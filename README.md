@@ -1,4 +1,4 @@
-# dolibarr_project_timesheet
+# dolibarr_page_from_SQLtable
 Generate Pages from SQL Table (imporvement from the dolibarr tools)
 
 
