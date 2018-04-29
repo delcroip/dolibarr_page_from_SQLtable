@@ -36,11 +36,11 @@ global $langs;
  
 function select_enum($table, $fieldValue,$htmlName,$selected='',$selectparam='',$addtionnalChoices=null){
 global $langs;
-global $db;
-    if($table=='' || $fieldValue=='' || $htmlName=='' )
+global $db;   
+if($table=='' || $fieldValue=='' || $htmlName=='' )
     {
         return 'error, one of the mandatory field of the function  select_enum is missing';
-    }    
+    } 
     $sql='SHOW COLUMNS FROM ';//llx_hr_event_time LIKE 'audience'";
     $sql.=MAIN_DB_PREFIX.$table.' WHERE Field="';
     $sql.=$fieldValue.'"';
@@ -69,7 +69,7 @@ global $db;
                 foreach ($enums as $enum){
                     $select.= '<option value="'.(substr($enum,1,-1)).'" ';
                     $select.=((substr($enum,1,-1)===$selected)?'selected="selected" >':'>');                    
-                    $select.=$langs->trans(substr($enum,1,-1));          
+                    $select.=$langs->trans(strtolower(substr($enum,1,-1)));          
                     $select.="</option>\n";
                 }
                 if($addtionnalChoices)foreach($addtionnalChoices as $value => $choice){
@@ -114,20 +114,29 @@ global $db;
 
  *  @return string                                                   html code
  */
-function select_generic($table, $fieldValue,$htmlName,$fieldToShow1,$fieldToShow2='',$selected='',$separator=' - ',$sqlTailWhere='', $selectparam='', $addtionnalChoices=array('NULL'=>'NULL'),$sqlTailTable='', $ajaxUrl=''){
+// to be taken into account when passing a Ajax handler
+//$conf->global->COMPANY_USE_SEARCH_TO_SELECT
+ //$conf->global->PRODUIT_USE_SEARCH_TO_SELECT
+ //$conf->global->PROJECT_USE_SEARCH_TO_SELECT
+ //$conf->global->RESOURCE_USE_SEARCH_TO_SELECT
+//$conf->global->BARCODE_USE_SEARCH_TO_SELECT
+//$conf->global->CONTACT_USE_SEARCH_TO_SELECT
+ 
+function select_generic($table, $fieldValue,$htmlName,$fieldToShow1,$fieldToShow2='',$selected='',$separator=' - ',$sqlTailWhere='', $selectparam='', $addtionnalChoices=array('NULL'=>'NULL'),$sqlTailTable='', $ajaxNbChar='',$showempty=1){
 
    
     
-    global $conf,$langs,$db;
+    global $conf,$langs,$db,$dolibarr_main_url_root,$dolibarr_main_url_root_alt;
      $ajax=$conf->use_javascript_ajax ;
     if($table=='' || $fieldValue=='' || $fieldToShow1=='' || $htmlName=='' )
     {
         return 'error, one of the mandatory field of the function  select_generic is missing';
     }
+    
     $select="\n";
     if ($ajax)
     {
-        
+
         include_once DOL_DOCUMENT_ROOT . '/core/lib/ajax.lib.php';
        $token=getToken();
 
@@ -135,9 +144,18 @@ function select_generic($table, $fieldValue,$htmlName,$fieldToShow1,$fieldToShow
         $comboenhancement = '';
         //$ajaxUrl='';
         $searchfields='';
-        if(! empty($ajaxUrl)){
+        if($ajaxNbChar ){
+            $ajaxUrl=$dolibarr_main_url_root;
+            if($dolibarr_main_force_https || strpos('ttps://',$_SERVER['PHP_SELF'])>0){
+                $ajaxUrl=str_replace('http://','https://',$ajaxUrl);
+            }
+            if(strpos($dolibarr_main_url_root_alt,$_SERVER['PHP_SELF'])>0)
+            {
+                 $ajaxUrl.='/'.$dolibarr_main_url_root_alt;
+            }
+            $ajaxUrl.='/timesheet/core/ajaxGenericSelectHandler.php';
             $_SESSION['ajaxQuerry'][$token]=array('table'=>$table, 'fieldValue'=>$fieldValue,'htmlName'=> $htmlName,'fieldToShow1'=>$fieldToShow1,'fieldToShow2'=>$fieldToShow2,'separator'=> $separator,'sqlTailTable'=>$sqlTailTable,'sqlTailWhere'=>$sqlTailWhere,'addtionnalChoices'=>$addtionnalChoices);
-            $comboenhancement = ajax_autocompleter($selected, $htmlName, $ajaxUrl, $urloption);
+            $comboenhancement = ajax_autocompleter($selected, $htmlName, $ajaxUrl, $urloption,$ajaxNbChar);
             $sqlTail.=" LIMIT 5";
             // put \\ before barket so the js will work for Htmlname before it is change to seatch HTMLname
             $htmlid=str_replace('[','\\\\[',str_replace(']','\\\\]',$htmlName));
@@ -165,9 +183,9 @@ function select_generic($table, $fieldValue,$htmlName,$fieldToShow1,$fieldToShow
     $sql.=' ,'.$fieldToShow1;
     if(!empty($fieldToShow2))
         $sql.=' ,'.$fieldToShow2;
+    $sql.= ' FROM '.MAIN_DB_PREFIX.$table.' as t';
     if(!empty($sqlTailTable))
             $sql.=' '.$sqlTailTable;
-    $sql.= ' FROM '.MAIN_DB_PREFIX.$table.' as t';
     if(!empty($sqlTailWhere))
             $sql.=' WHERE '.$sqlTailWhere;
        
@@ -186,7 +204,7 @@ function select_generic($table, $fieldValue,$htmlName,$fieldToShow1,$fieldToShow
         if($starfields2>0)
             $fieldToShow2=  substr($fieldToShow2, $starfields2+4);
 
-        $selectOptions.= "<option value=\"-1\" ".(empty($selected)?"selected":"").">&nbsp;</option>\n";
+        if($showempty==1)$selectOptions.= "<option value=\"-1\" ".(empty($selected)?"selected":"").">&nbsp;</option>\n";
         $i=0;
          //return $table."this->db".$field;
         $num = $db->num_rows($resql);
@@ -224,7 +242,7 @@ function select_generic($table, $fieldValue,$htmlName,$fieldToShow1,$fieldToShow
     }
      
    
-    if(!empty($ajaxUrl) && $ajax){
+    if($ajaxNbChar && $ajax){
         if ($selectedValue=='' && is_array($addtionnalChoices)){
             $selectedValue=$addtionnalChoices[$selected];
         }
@@ -320,15 +338,43 @@ function print_generic($table, $fieldValue,$selected,$fieldToShow1,$fieldToShow2
       //$select.="\n";
       return $select;
  }
-
  /*
- * function to genegate a select list from a table, the showed text will be a concatenation of some 
- * column defined in column bit, the Least sinificative bit will represent the first colum 
+ * function to print a bitstring (or sting starting  with _)
  * 
- *  @param    object             	$db                 db Object to do the querry
- *  @param    int/array                       $userid             ID of the user you want to get the subordinate liste *  @param    int                       $userid             ID of the user you want to get the subordinate liste
- *  @param    int                       $entity             entity 
- *  @return   array                                         List of the subordinate ids  and level [[id][lvl]]                                          
+ *  @param    string                                            $bitstring              list f bits
+ *  @param     array( string label))   $labels                 array of label ( dispaly label) for the bit number key
+ *  @param     array(string name))     $names                 array of name (input name) for the bit number key  
+ *  @param    int                       $edit             active the  read only mode
+ *  @return   string                htmlcode                                       
+ */
+ 
+ function printBitStringHTML($bitstring,$labels,$names,$edit=0){
+     global $langs;
+     $html="error, paramters of printBitStringHTML not valid";
+     $numberOfBits=count($labels);
+     if(is_array($labels) && count_chars(bitstring)!=($numberOfBits+1)){
+          $htmlValue='';
+          $html='<table class="noborder" width="100%"><tr class="titre">';  
+
+           for($i=0;$i<$numberOfBits;$i++){
+               // labels
+               $html.='<td width="'.floor(100/$numberOfBits).'%">'.$labels[$i].'<td>';
+               $htmlValue.='<td><input type="checkbox" name="'.$names[$i].'"'.((substr($bitstring, $i+1, 1))?' checked':'').(($edit)?'':' readonly').' ><td>';
+
+           }
+           $html.='</tr><tr>'.$htmlValue.'</tr></table>';
+     }
+     return $html;
+
+ }
+ 
+ 
+ /*
+ * function to genegate a random number
+ * 
+ *  @param    int            	$min                min seed
+ *  @param    int                      $max            max seed
+ *  @return   int                                  random number                                         
  */
  
  
@@ -345,7 +391,12 @@ function print_generic($table, $fieldValue,$selected,$fieldToShow1,$fieldToShow2
         } while ($rnd >= $range);
         return $min + $rnd;
 }
-
+ /*
+ * function to genegate a random string
+ * 
+ *  @param    int            	$lentgh                lentgh of the random string
+ *  @return   int                                  random sting                                        
+ */
 function getToken($length=32){
     $token = "";
     $codeAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -356,3 +407,4 @@ function getToken($length=32){
     }
     return $token;
 }
+    
