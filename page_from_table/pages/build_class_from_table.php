@@ -136,12 +136,9 @@ if ($resql)
                 if($property[$i]['var']=='user_modification' ) $addfield=0;
                 if($property[$i]['var']=='user_modif') $addfield=0;
                 if($property[$i]['var']=='date_modification') $addfield=0;
-                if($property[$i]['var']=='date_modif') $addfield=0;
                 if($property[$i]['var']=='user_creation') $addfield=0;
                 if($property[$i]['var']=='user_author') $addfield=0;
-                if($property[$i]['var']=='user_creat') $addfield=0;
                 if($property[$i]['var']=='date_creation') $addfield=0;
-                if($property[$i]['var']=='date_creat') $addfield=0;
                 if($property[$i]['var']=='datec') $addfield=0;
                 if ($property[$i]['field'] == 'tms') $addfield=0;	// This is a field of type timestamp edited automatically
                 if ($property[$i]['extra'] == 'auto_increment') $addfield=0;
@@ -154,7 +151,6 @@ if ($resql)
                 if($property[$i]['var']=='user_modification') $addfield=0;
                 if($property[$i]['var']=='user_modif') $addfield=0;
                 if($property[$i]['var']=='date_modification' ) $addfield=0;
-                if($property[$i]['var']=='date_modif' ) $addfield=0;
                 if ($property[$i]['field'] == 'tms') $addfield=0;	// This is a field of type timestamp edited automatically
                 if ($property[$i]['extra'] == 'auto_increment') $addfield=0;
                 $property[$i]['insertfield']=($addfield==1)?true:false;
@@ -164,10 +160,8 @@ if ($resql)
                 if($property[$i]['var']=='entity') $addfield=0;
                 if($property[$i]['var']=='rowid') $addfield=0;
                 if($property[$i]['var']=='user_creation') $addfield=0;
-                if($property[$i]['var']=='user_creat') $addfield=0;
                 if($property[$i]['var']=='user_author') $addfield=0;
                 if($property[$i]['var']=='date_creation') $addfield=0;
-                if($property[$i]['var']=='date_creat') $addfield=0;
                  if($property[$i]['var']=='datec') $addfield=0;
                 if ($property[$i]['field'] == 'tms') $addfield=0;	// This is a field of type timestamp edited automatically
                 if ($property[$i]['extra'] == 'auto_increment') $addfield=0;
@@ -235,7 +229,7 @@ $targetcontent=preg_replace('/skeleton_class\.class\.php/', $classmin.'.class.ph
 $targetcontent=preg_replace('/skeleton/', $classmin, $targetcontent);
 //$targetcontent=preg_replace('/\$table_element=\'skeleton\'/', '\$table_element=\''.$classmin.'\'', $targetcontent);
 $targetcontent=preg_replace('/Skeleton_Class/', $classname, $targetcontent);
-$targetcontent=preg_replace('/Skeleton/', $classname, $targetcontent);
+
 // Substitute comments
 $targetcontent=preg_replace('/This file is an example to create a new class file/', 'Put here description of this class', $targetcontent);
 $targetcontent=preg_replace('/\s*\/\/\.\.\./', '', $targetcontent);
@@ -251,7 +245,7 @@ foreach($property as $key => $prop)
 {
 	if ($prop['field'] != 'rowid' && $prop['field'] != 'id')
 	{
-		$varprop.="\tpublic \$".$prop['var'];
+		$varprop.="\tvar \$".$prop['var'];
 		if ($prop['istime']) $varprop.="=''";
 		$varprop.=";";
 		if ($prop['comment']) $varprop.="\t// ".$prop['extra'];
@@ -268,7 +262,7 @@ foreach($property as $key => $prop)
 {
 	if ($prop['insertfield'] ||$prop['updatefield'])
 	{
-		$varprop.="\t\tif (!empty(\$this->".$prop['var'].")) \$this->".$prop['var']."=trim(\$this->".$prop['var'].");";
+		$varprop.="\t\tif (isset(\$this->".$prop['var'].")) \$this->".$prop['var']."=trim(\$this->".$prop['var'].");";
 		$varprop.="\n";
 	}
 }
@@ -305,27 +299,27 @@ foreach($property as $key => $prop)
 	{
 		$varprop.="\t\t\$sql.=' ";
 		
-                if($prop['var']=='date_creation' ||$prop['var']=='date_creat' || $prop['var']=='datec'){
+                if($prop['var']=='date_creation' || $prop['var']=='datec'){
                         $varprop.='NOW() ';
-                }else if($prop['var']=='user_creation' ||$prop['var']=='user_author' || $prop['var']=='user_creat'){
+                }else if($prop['var']=='user_creation'){
 //                        $varprop.='\'".\$user->id."\'';
                         $varprop.="\"'.\$user->id.'\"";
                        // $varprop.='{\$user->id}'; //FIXME ?
                 }else if ($prop['istime'])
 		{
-			$varprop.="'.(empty(\$this->".$prop['var'].') || dol_strlen($this->'.$prop['var'].")==0?'NULL':\"'\".\$this->db->idate(";
+			$varprop.="'.(! isset(\$this->".$prop['var'].') || dol_strlen($this->'.$prop['var'].")==0?'NULL':\"'\".\$this->db->idate(";
 			$varprop.="\$this->".$prop['var'].")";
 			$varprop.=".\"'\").'";
 		}
 		else if ($prop['ischar'])
 		{
-			$varprop.="'.(empty(\$this->".$prop['var'].")?'NULL':\"'\".";
+			$varprop.="'.(! isset(\$this->".$prop['var'].")?'NULL':\"'\".";
 			$varprop.="\$this->db->escape(\$this->".$prop['var'].")";
 			$varprop.=".\"'\").'";
 		}
 		else
 		{
-			$varprop.="'.(empty(\$this->".$prop['var'].")?'NULL':\"'\".";
+			$varprop.="'.(! isset(\$this->".$prop['var'].")?'NULL':\"'\".";
 			$varprop.="\$this->".$prop['var']."";
 			$varprop.=".\"'\").'";
 		}
@@ -351,9 +345,9 @@ foreach($property as $key => $prop)
                 
                 $varprop.="\t\t\$sql.=' ";
                 $varprop.=$prop['field'].'=';
-                if($prop['var']=='date_modification'||$prop['var']=='date_modif'){
+                if($prop['var']=='date_modification'){
                     $varprop.='NOW() ';
-                }else if($prop['var']=='user_modification'||$prop['var']=='user_modif'){
+                }else if($prop['var']=='user_modification'){
                     $varprop.="\"'.\$user->id.'\"";
                      // $varprop.='".\$user."'; //FIXME ?
                 }else if ($prop['istime'])
@@ -503,7 +497,7 @@ else $error++;
 
 
 
-$files=array('_card', '_list', '_document','_list','.lib','_agenda','_note');
+$files=array('_card', '_list', '_document','_list','.lib');
 foreach ($files as $file){
     
 // Read skeleton_page.php file
@@ -822,7 +816,7 @@ $targetcontent=preg_replace('/print \'<td><input type="text" name="ls_fields2" v
  */
 $varprop='';
 
-$varprop.="\t\tprint \"<tr class=\\\"oddeven')\\\"  onclick=\\\"location.href='\";\n";
+$varprop.="\t\tprint \"<tr class=\\\"\".((\$i%2==0)?'pair':'impair').\"\\\"  onclick=\\\"location.href='\";\n";
 $varprop.="\tprint \$basedurl.\$obj->rowid.\"'\\\" >\";\n";
 foreach($property as $key => $prop)
 {

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * Copyright (C) 2015	   Patrick DELCROIX     <pmpdelcroix@gmail.com>
+ * Copyright (C) 2018	   Patrick DELCROIX     <pmpdelcroix@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,81 +20,6 @@
 global $langs;
 
 
-/*
- * function to genegate a select list from a table, the showed text will be a concatenation of some 
- * column defined in column bit, the Least sinificative bit will represent the first colum 
- * 
- *  @param    object             	$db                 db Object to do the querry
- *  @param    string              	$table              table which the enum refers to (without prefix)
- *  @param    string              	$fieldValue         field of the table which the enum refers to
- *  @param    string              	$htmlName           name to the form select
- *  @param    string              	$selected           which value must be selected
- *  @param    string              	$selectparam          to add parameters to the select
- *  @param    array(string)             $addtionnalChoices    array of additionnal fields Array['VALUE']=string to show
- *  @return string                                                   html code
- */
- 
-function select_enum($table, $fieldValue,$htmlName,$selected='',$selectparam='',$addtionnalChoices=null){
-global $langs;
-global $db;   
-if($table=='' || $fieldValue=='' || $htmlName=='' )
-    {
-        return 'error, one of the mandatory field of the function  select_enum is missing';
-    } 
-    $sql='SHOW COLUMNS FROM ';//llx_hr_event_time LIKE 'audience'";
-    $sql.=MAIN_DB_PREFIX.$table.' WHERE Field="';
-    $sql.=$fieldValue.'"';
-    //$sql.= " ORDER BY t.".$field;
-       
-    dol_syslog('form::select_enum ', LOG_DEBUG);
-    
-    $resql=$db->query($sql);
-    
-    if ($resql)
-    {
-        $i=0;
-         //return $table."this->db".$field;
-        $num = $db->num_rows($resql);
-        if($num)
-        {
-           
-            $obj = $db->fetch_object($resql);
-            if ($obj && strpos($obj->Type,'enum(')===0)
-            {
-                if(empty($selected) && !empty($obj->Default))$selected="'{$obj->Default}'";
-                    $select.='<select class="flat minwidth200" id="'.$htmlName.'Select" name="'.$htmlName.'"'.$nodatarole.' '.$selectparam.'>';
-                    $select.= '<option value="-1" '.(empty($selected)?'selected="selected"':'').">&nbsp;</option>\n";
-
-                $enums= explode(',',substr($obj->Type, 5,-1));
-                foreach ($enums as $enum){
-                    $select.= '<option value="'.(substr($enum,1,-1)).'" ';
-                    $select.=((substr($enum,1,-1)===$selected)?'selected="selected" >':'>');                    
-                    $select.=$langs->trans(strtolower(substr($enum,1,-1)));          
-                    $select.="</option>\n";
-                }
-                if($addtionnalChoices)foreach($addtionnalChoices as $value => $choice){
-                     $select.='<option value="'.$value.'" '.(($selected==$value)?'selected':'').">{$choice}</option>\n";
-                }
-                $select.= '<option value="NULL" '.(($selected=='NULL')?'selected':'').">NULL</option>\n";
-                $select.="</select>\n";
-            }else{
-                $select="<input selected=\"{$selected}\" id=\"{$htmlName} \" name=\"{$htmlName}\">";
-            }
- 
-        }else{
-                $select="<input selected=\"{$selected}\" id=\"{$htmlName} \" name=\"{$htmlName}\">";
-        }
-    }
-    else
-    {
-        $error++;
-        dol_print_error($db);
-       $select="<input selected=\"{$selected}\" id=\"{$htmlName} \" name=\"{$htmlName}\">";
-    }
-      
-      return $select;
-    
- }
 /*
  * function to genegate a select list from a table, the showed text will be a concatenation of some 
  * column defined in column bit, the Least sinificative bit will represent the first colum 
@@ -121,18 +46,25 @@ if($table=='' || $fieldValue=='' || $htmlName=='' )
  //$conf->global->RESOURCE_USE_SEARCH_TO_SELECT
 //$conf->global->BARCODE_USE_SEARCH_TO_SELECT
 //$conf->global->CONTACT_USE_SEARCH_TO_SELECT
- 
-function select_generic($table, $fieldValue,$htmlName,$fieldToShow1,$fieldToShow2='',$selected='',$separator=' - ',$sqlTailWhere='', $selectparam='', $addtionnalChoices=array('NULL'=>'NULL'),$sqlTailTable='', $ajaxNbChar='',$showempty=1){
-
-   
-    
-    global $conf,$langs,$db,$dolibarr_main_url_root,$dolibarr_main_url_root_alt;
+function select_sellist($sqlarray=array('table'=> 'user','keyfield'=> 'rowid','fields'=>'firstname,lastname', 'join' => '', 'where'=>'','tail'=>''),
+                        $htmlarray=array('name'=> 'HTMLSellist','class'=>'','otherparam'=>'','$ajaxNbChar'=>'','separator'=> ' '),
+                        $selected='',
+                        $addtionnalChoices=array('NULL'=>'NULL')){
+        global $conf,$langs,$db;
      $ajax=$conf->use_javascript_ajax ;
-    if($table=='' || $fieldValue=='' || $fieldToShow1=='' || $htmlName=='' )
+    if( !isset($sqlarray['table'])|| !isset($sqlarray['keyfield'])||!isset($sqlarray['fields']) || !isset($htmlarray['name']))
     {
-        return 'error, one of the mandatory field of the function  select_generic is missing';
+        return 'error, one of the mandatory field of the function  select_sellist is missing';
     }
-    
+    $htmlName=$htmlarray['name'];
+    $ajaxNbChar=$htmlarray['ajaxNbChar'];
+    $listFields=explode(',',$sqlarray['fields']);
+    $fields=array();
+    foreach($listFields as $item){
+        $start=MAX(strpos($item,' AS '),strpos($item,' as '));
+        $label=($start)? substr($item, $start+4):$item;
+        $fields[]=array('select' => $item, 'label'=>$label);
+    }
     $select="\n";
     if ($ajax)
     {
@@ -145,16 +77,13 @@ function select_generic($table, $fieldValue,$htmlName,$fieldToShow1,$fieldToShow
         //$ajaxUrl='';
         $searchfields='';
         if($ajaxNbChar ){
-            $ajaxUrl=$dolibarr_main_url_root;
-            if($dolibarr_main_force_https || strpos('ttps://',$_SERVER['PHP_SELF'])>0){
-                $ajaxUrl=str_replace('http://','https://',$ajaxUrl);
-            }
-            if(strpos($dolibarr_main_url_root_alt,$_SERVER['PHP_SELF'])>0)
-            {
-                 $ajaxUrl.='/'.$dolibarr_main_url_root_alt;
-            }
-            $ajaxUrl.='/timesheet/core/ajaxGenericSelectHandler.php';
-            $_SESSION['ajaxQuerry'][$token]=array('table'=>$table, 'fieldValue'=>$fieldValue,'htmlName'=> $htmlName,'fieldToShow1'=>$fieldToShow1,'fieldToShow2'=>$fieldToShow2,'separator'=> $separator,'sqlTailTable'=>$sqlTailTable,'sqlTailWhere'=>$sqlTailWhere,'addtionnalChoices'=>$addtionnalChoices);
+            $ajaxUrl=dol_buildpath('/project_cost/core/ajaxGenericSelectHandler.php',1);
+            $_SESSION['ajaxQuerry'][$token]['sql']=$sqlarray;
+            $_SESSION['ajaxQuerry'][$token]['fields']=$fields;
+            $_SESSION['ajaxQuerry'][$token]['html']=$htmlarray; 
+            $_SESSION['ajaxQuerry'][$token]['option']=$addtionnalChoices;
+            
+                    //array('table'=>$table, 'fieldValue'=>$fieldValue,'htmlName'=> $htmlName,'fieldToShow1'=>$fieldToShow1,'fieldToShow2'=>$fieldToShow2,'separator'=> $separator,'sqlTailTable'=>$sqlTailTable,'sqlTailWhere'=>$sqlTailWhere,'addtionnalChoices'=>$addtionnalChoices);
             $comboenhancement = ajax_autocompleter($selected, $htmlName, $ajaxUrl, $urloption,$ajaxNbChar);
             $sqlTail.=" LIMIT 5";
             // put \\ before barket so the js will work for Htmlname before it is change to seatch HTMLname
@@ -178,34 +107,27 @@ function select_generic($table, $fieldValue,$htmlName,$fieldToShow1,$fieldToShow
 
     $SelectOptions='';
     $selectedValue='';
-    $sql='SELECT DISTINCT';
-    $sql.=' t.'.$fieldValue;
-    $sql.=' ,'.$fieldToShow1;
-    if(!empty($fieldToShow2))
-        $sql.=' ,'.$fieldToShow2;
-    $sql.= ' FROM '.MAIN_DB_PREFIX.$table.' as t';
-    if(!empty($sqlTailTable))
-            $sql.=' '.$sqlTailTable;
-    if(!empty($sqlTailWhere))
-            $sql.=' WHERE '.$sqlTailWhere;
-       
-    dol_syslog('form::select_generic ', LOG_DEBUG);
+    $sql='SELECT DISTINCT ';
+    $sql.=$sqlarray['keyfield'];
+    $sql.=' ,'.$sqlarray['fields'];
+    $sql.= ' FROM '.MAIN_DB_PREFIX.$sqlarray['table'].' as t';
+    if(isset($sqlarray['join']) && !empty($sqlarray['join']))
+            $sql.=' '.$sqlarray['join'];
+    if(isset($sqlarray['where']) && !empty($sqlarray['where']))
+            $sql.=' WHERE '.$sqlarray['where'];
+    if(isset($sqlarray['tail']) && !empty($sqlarray['tail']))
+            $sql.=' '.$sqlarray['tail'];      
+    dol_syslog('form::select_sellist ', LOG_DEBUG);
     
     $resql=$db->query($sql);
    
     if ($resql)
     {
-          // support AS in the fields ex $field1='CONTACT(u.firstname,' ',u.lastname) AS fullname'
-        // with sqltail= 'JOIN llx_user as u ON t.fk_user=u.rowid'
-        $starfields1=strpos($fieldToShow1,' AS ');
-        if($starfields1>0)
-            $fieldToShow1=  substr($fieldToShow1, $starfields1+4);
-        $starfields2=strpos($fieldToShow2,' AS ');
-        if($starfields2>0)
-            $fieldToShow2=  substr($fieldToShow2, $starfields2+4);
 
-        if($showempty==1)$selectOptions.= "<option value=\"-1\" ".(empty($selected)?"selected":"").">&nbsp;</option>\n";
+
+        $selectOptions.= "<option value=\"-1\" ".(empty($selected)?"selected":"").">&nbsp;</option>\n";
         $i=0;
+        $separator=isset($htmlarray['separator'])?$htmlarray['separator']:' ';
          //return $table."this->db".$field;
         $num = $db->num_rows($resql);
         while ($i < $num)
@@ -215,9 +137,13 @@ function select_generic($table, $fieldValue,$htmlName,$fieldToShow1,$fieldToShow
             
             if ($obj)
             {
-                $fieldtoshow=$obj->{$fieldToShow1}.((!empty($fieldToShow2))?$separator.$obj->{$fieldToShow2}:''); 
-                $selectOptions.= "<option value=\"".$obj->{$fieldValue}."\" ";
-                if($obj->{$fieldValue}==$selected){
+                $fieldtoshow='';
+                foreach($fields as $item){
+                    if(!empty($fieldtoshow))$fieldtoshow.=$separator;
+                    $fieldtoshow.=$obj->{$label};
+                }
+                $selectOptions.= "<option value=\"".$obj->{$sqlarray['keyfield']}."\" ";
+                if($obj->{$sqlarray['keyfield']}==$selected){
                      $selectOptions.='selected=\"selected\"';
                      $selectedValue=$fieldtoshow;
                  }
@@ -246,72 +172,56 @@ function select_generic($table, $fieldValue,$htmlName,$fieldToShow1,$fieldToShow
         if ($selectedValue=='' && is_array($addtionnalChoices)){
             $selectedValue=$addtionnalChoices[$selected];
         }
-        $select.='<input type="text" class="minwidth200" name="'.$htmlName.'" id="'.$htmlName.'" value="'.$selectedValue.'"'.$selectparam.' />';
+        $select.='<input type="text" class="minwidth200 '.(isset($htmlarray['class'])?$htmlarray['class']:'').'" name="'.$htmlName.'" id="'.(isset($htmlarray['id'])?$htmlarray['id']:$htmlName).'" value="'.$selectedValue.'"'.$htmlarray['otherparam'].' />';
     }else{
-        $select.='<select class="flat minwidth200" id="'.$htmlName.'" name="'.$htmlName.'"'.$nodatarole.' '.$selectparam.'>';
+        $select.='<select class="flat minwidth200 '.(isset($htmlarray['class'])?$htmlarray['class']:'').'" id="'.(isset($htmlarray['id'])?$htmlarray['id']:$htmlName).' name="'.$htmlName.'"'.$nodatarole.' '.$htmlarray['otherparam'].'>';
         $select.=$selectOptions;
         $select.="</select>\n";
     }
    // }
       return $select;
     
+} 
+
+function select_generic($table, $fieldValue,$htmlName,$fieldToShow1,$fieldToShow2='',$selected='',$separator=' - ',$sqlTailWhere='', $selectparam='', $addtionnalChoices=array('NULL'=>'NULL'),$sqlTailTable='', $ajaxNbChar=''){
+    return select_sellist($sqlarray=array('table'=> $table,'keyfield'=> $fieldValue,'fields'=>$fieldToShow1.(empty($fieldToShow2)?'':','.$fieldToShow2), 'join' => '', 'where'=>$sqlTailWhere,'tail'=>$sqlTailTable),
+                        $htmlarray=array('name'=>$htmlName,'class'=>'','otherparam'=>$selectparam,'$ajaxNbChar'=>$ajaxNbChar,'separator'=> $separator),
+                        $selected,
+                        $addtionnalChoices);
  }
  
  
-/*
- * function to genegate a select list from a table, the showed text will be a concatenation of some 
- * column defined in column bit, the Least sinificative bit will represent the first colum 
- * 
- *  @param    object             	$db                 db Object to do the querry
- *  @param    string              	$table                 table which the fk refers to (without prefix)
- *  @param    string              	$fieldValue         field of the table which the fk refers to, the one to put in the Valuepart
- *  @param    string              	$selected           value selected of the field value column
- *  @param    string              	$fieldToShow1    first part of the concatenation
- *  @param    string              	$fieldToShow1    second part of the concatenation
- *  @param    string              	$separator          separator between the tow contactened fileds
- *  @param    string              	$sqlTail              to limit per entity, to filter ...
-
- *  @return string                                                   html code
- */
-function print_generic($table, $fieldValue,$selected,$fieldToShow1,$fieldToShow2="",$separator=' - ',$sqltail="",$sqljoin=""){
-   //return $table.$db.$field;
-    global $db;
-    if($table=="" || $fieldValue=="" || $fieldToShow1=='')
+ function print_sellist($sqlarray=array('table'=> 'user','keyfield'=> 'rowid','fields'=>'firstname,lastname', 'join' => '', 'where'=>'','tail'=>''),
+                        $selected,$separator=' '){
+    global $conf,$langs,$db;
+    if( !isset($sqlarray['table'])|| !isset($sqlarray['keyfield'])||!isset($sqlarray['fields']) )
     {
-        return "error, one of the mandatory field of the function  print_generic is missing";
+        return 'error, one of the mandatory field of the function  select_sellist is missing';
     }else if (empty($selected)){
         return "NuLL";
     }
     
-    $sql="SELECT";
-    $sql.=" t.".$fieldValue;
-    $sql.=" ,".$fieldToShow1;
-    if(!empty($fieldToShow2))
-        $sql.=" ,".$fieldToShow2;
-    $sql.= " FROM ".MAIN_DB_PREFIX.$table." as t";
-    if(!empty($sqljoin))
-        $sql.=' '.$sqljoin;
-    $sql.= " WHERE t.".$fieldValue."=".$selected;
-    if(!empty($sqlTail))
-            $sql.=' '.$sqlTail;
-       
-    dol_syslog("form::print_generic ", LOG_DEBUG);
-    
+    $sql='SELECT DISTINCT ';
+    $sql.=$sqlarray['keyfield'];
+    $sql.=' ,'.$sqlarray['fields'];
+    $sql.= ' FROM '.MAIN_DB_PREFIX.$sqlarray['table'].' as t';
+    if(isset($sqlarray['join']) && !empty($sqlarray['join']))
+            $sql.=' '.$sqlarray['join'];
+    if(isset($sqlarray['where']) && !empty($sqlarray['where']))
+            $sql.=' WHERE '.$sqlarray['where'];
+    if(isset($sqlarray['tail']) && !empty($sqlarray['tail']))
+            $sql.=' '.$sqlarray['tail'];      
+    dol_syslog('form::print_sellist ', LOG_DEBUG);
     $resql=$db->query($sql);
-    
-    if ($resql)
+     if ($resql)
     {
-    // support AS in the fields ex $field1='CONTACT(u.firstname,' ',u.lastname) AS fullname'
-     // with sqltail= 'JOIN llx_user as u ON t.fk_user=u.rowid'
-     $starfields1=strpos($fieldToShow1,' AS ');
-     if($starfields1>0){
-         $fieldToShow1=  substr($fieldToShow1, $starfields1+4);
-     }
-     $starfields2=strpos($fieldToShow2,' AS ');
-     if($starfields2>0){
-         $fieldToShow2=substr($fieldToShow2, $starfields2+4);
-      }
-
+        $listFields=explode(',',$sqlarray['fields']);
+        $fields=array();
+        foreach($listFields as $item){
+           $start=MAX(strpos($item,' AS '),strpos($item,' as '));
+           $label=($start)? substr($item, $start+4):$item;
+           $fields[]=array('select' => $item, 'label'=>$label);
+        }
         $num = $db->num_rows($resql);
         if ( $num)
         {
@@ -319,9 +229,11 @@ function print_generic($table, $fieldValue,$selected,$fieldToShow1,$fieldToShow2
             
             if ($obj)
             {
-                            $select=$obj->{$fieldToShow1};
-                            if(!empty($fieldToShow2))
-                                 $select.=$separator.$obj->{$fieldToShow2};        
+                $select='';
+                foreach($fields as $item){
+                    if(!empty($select))$select.=$separator;
+                    $select.=$obj->{$label};
+                }     
             }else{
                 $select= "NULL";
             }
@@ -337,6 +249,25 @@ function print_generic($table, $fieldValue,$selected,$fieldToShow1,$fieldToShow2
     }
       //$select.="\n";
       return $select;
+ }
+ 
+/*
+ * function to genegate a select list from a table, the showed text will be a concatenation of some 
+ * column defined in column bit, the Least sinificative bit will represent the first colum 
+ * 
+ *  @param    string              	$table                 table which the fk refers to (without prefix)
+ *  @param    string              	$fieldValue         field of the table which the fk refers to, the one to put in the Valuepart
+ *  @param    string              	$selected           value selected of the field value column
+ *  @param    string              	$fieldToShow1    first part of the concatenation
+ *  @param    string              	$fieldToShow2        separator between the tow contactened fileds
+ *  @param    string              	$sqlTail              to limit per entity, to filter ...
+
+ *  @return string                                                   html code
+ */
+function print_generic($table, $fieldValue,$selected,$fieldToShow1,$fieldToShow2="",$separator=' - ',$sqltail="",$sqljoin=""){
+   //return $table.$db.$field;
+ return  print_sellist($sqlarray=array('table'=> $table,'keyfield'=> $fieldValue,'fields'=>$fieldToShow1.(empty($fieldToShow2)?'':','.$fieldToShow2), 'join' => $sqljoin, 'where'=>'','tail'=>$sqltail),
+                        $selected,$separator);
  }
  /*
  * function to print a bitstring (or sting starting  with _)
@@ -407,4 +338,3 @@ function getToken($length=32){
     }
     return $token;
 }
-    

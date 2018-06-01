@@ -10,20 +10,18 @@ include 'lib/includeMain.lib.php';
  global $conf,$langs,$db;
  top_httphead();
 //get the token,exit if 
-$token=GETPOST('token');
+$token=GETPOST('token','apha');
 
 if(!isset($_SESSION['ajaxQuerry'][$token]))exit();
 
-$table=$_SESSION['ajaxQuerry'][$token]['table'];
-$fieldValue=$_SESSION['ajaxQuerry'][$token]['fieldValue'];
-$fieldToShow1=$_SESSION['ajaxQuerry'][$token]['fieldToShow1'];
-$fieldToShow2=$_SESSION['ajaxQuerry'][$token]['fieldToShow2'];
-$separator=$_SESSION['ajaxQuerry'][$token]['separator'];
-$sqlTailTable=$_SESSION['ajaxQuerry'][$token]['sqlTailTable'];
-$sqlTailWhere=$_SESSION['ajaxQuerry'][$token]['sqlTailWhere'];
-$htmlName=$_SESSION['ajaxQuerry'][$token]['htmlName'];
-$addtionnalChoices=$_SESSION['ajaxQuerry'][$token]['addtionnalChoices'];
- $search=GETPOST($htmlName);
+$sqlarray=$_SESSION['ajaxQuerry'][$token]['sql'];
+$fields=$_SESSION['ajaxQuerry'][$token]['fields'];
+$htmlarray=$_SESSION['ajaxQuerry'][$token]['html']; 
+$addtionnalChoices=$_SESSION['ajaxQuerry'][$token]['option'];
+$separator=isset($htmlarray['separator'])?$htmlarray['separator']:' ';
+
+
+ $search=GETPOST($htmlName,'alpha');
 //find if barckets
 $posBs=strpos($htmlName,'[');
 if($posBs>0){
@@ -35,19 +33,18 @@ if($posBs>0){
 }
 
 
-    $sql='SELECT DISTINCT';
-    $sql.=' '.$fieldValue;
-    $sql.=' ,'.$fieldToShow1;
-    if(!empty($fieldToShow2))
-        $sql.=' ,'.$fieldToShow2;
-    $sql.= ' FROM '.MAIN_DB_PREFIX.$table.' as t';
-    if(!empty($sqlTailTable))
-        $sql.=' AND '.$sqlTailTable;   
-    $sql.= ' WHERE ( '.$fieldValue.' LIKE "%'.$search.'%"';
-    $sql.= ' OR '.$fieldToShow1.' LIKE "%'.$search.'%"';
-    $sql.= ' OR '.$fieldToShow2.' LIKE "%'.$search.'%")';
-    if(!empty($sqlTailWhere))
-        $sql.=' AND '.$sqlTailWhere;
+    $sql='SELECT DISTINCT ';
+    $sql.=$sqlarray['keyfield'];
+    $sql.=' ,'.$sqlarray['fields'];
+    $sql.= ' FROM '.MAIN_DB_PREFIX.$sqlarray['table'].' as t';
+    if(isset($sqlarray['join']) && !empty($sqlarray['join']))
+            $sql.=' '.$sqlarray['join'];
+    if(isset($sqlarray['where']) && !empty($sqlarray['where']))
+            $sql.=' WHERE '.$sqlarray['where'];
+    if(isset($sqlarray['tail']) && !empty($sqlarray['tail']))
+            $sql.=' '.$sqlarray['tail'];      
+    dol_syslog('form::select_sellist ', LOG_DEBUG);
+    
        
     dol_syslog('form::ajax_select_generic ', LOG_DEBUG);
     $return_arr = array();
@@ -57,12 +54,13 @@ if($posBs>0){
     {
           // support AS in the fields ex $field1='CONTACT(u.firstname,' ',u.lastname) AS fullname'
         // with sqltail= 'JOIN llx_user as u ON t.fk_user=u.rowid'
-        $starfields1=strpos($fieldToShow1,' AS ');
-        if($starfields1>0)
-            $fieldToShow1=  substr($fieldToShow1, $starfields1+4);
-        $starfields2=strpos($fieldToShow2,' AS ');
-        if($starfields2>0)
-            $fieldToShow2=  substr($fieldToShow2, $starfields2+4);
+        $listFields=explode(',',$sqlarray['fields']);
+        $fields=array();
+        foreach($listFields as $item){
+            $start=MAX(strpos($item,' AS '),strpos($item,' as '));
+            $label=($start)? substr($item, $start+4):$item;
+            $fields[]=array('select' => $item, 'label'=>$label);
+        }
 
         $i=0;
          //return $table."this->db".$field;
@@ -74,11 +72,13 @@ if($posBs>0){
             
             if ($obj)
             {
-                    
-                $label=$obj->{$fieldToShow1};
-                $label.=(!empty($fieldToShow2))?($separator.$obj->{$fieldToShow2}):'';
+                                $label='';
+                foreach($fields as $item){
+                    if(!empty($label))$label.=$separator;
+                    $label.=$obj->{$label};
+                }    
                 $row_array['label'] =  $label;
-                $value=$obj->{$fieldValue};
+                $value=$obj->{$sqlarray['keyfield']};
 		//$row_array['value'] = $value;
                 $row_array['value'] =  $label;
 	        $row_array['key'] =$value;
@@ -87,8 +87,8 @@ if($posBs>0){
             $i++;
         }
         if($addtionnalChoices)foreach($addtionnalChoices as $value => $label){
-                $row_array['label'] =  $label;
-		$row_array['value'] = $value;
+                $row_array['label'] = $label;
+		$row_array['value'] = $label;
 	        $row_array['key'] =$value;
             array_push($return_arr,$row_array);
         }
@@ -98,4 +98,3 @@ if($posBs>0){
 
  
       echo json_encode($return_arr);
-    

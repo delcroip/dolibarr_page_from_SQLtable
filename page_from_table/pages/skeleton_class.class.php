@@ -229,7 +229,6 @@ class Skeleton_Class extends CommonObject
             }
     }
 
- 
      /**
      *	Return clickable name (with picto eventually)
      *
@@ -241,10 +240,8 @@ class Skeleton_Class extends CommonObject
      */
     function getNomUrl($htmlcontent,$id=0,$ref='',$withpicto=0)
     {
-	global $conf, $langs;
+    	global $langs;
 
-
-        if (! empty($conf->dol_no_mouse_hover)) $notooltip=1;   // Force disable tooltips
     	$result='';
         if(empty($ref) && $id==0){
             if(isset($this->id))  {
@@ -255,38 +252,23 @@ class Skeleton_Class extends CommonObject
                 $ref=$this->ref;
             }
         }
-        $linkclose='';
-        if (empty($notooltip))
-        {
-            if (! empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER))
-            {
-                $label=$langs->trans("Showspread");
-                $linkclose.=' alt="'.dol_escape_htmltag($label, 1).'"';
-            }
-            $linkclose.=' title="'.dol_escape_htmltag($label, 1).'"';
-            $linkclose.=' class="classfortooltip'.($morecss?' '.$morecss:'').'"';
-        }else $linkclose = ($morecss?' class="'.$morecss.'"':'');
         
         if($id){
-            $lien = '<a href="'.dol_buildpath('/mymodule/Skeleton_card.php',1).'id='.$id.'&action=view"'.$linkclose.'>';
+            $lien = '<a href="'.DOL_URL_ROOT.'/mymodule/Skeleton_card.php?id='.$id.'&action=view">';
         }else if (!empty($ref)){
-            $lien = '<a href="'.dol_buildpath('/mymodule/Skeleton_card.php',1).'?ref='.$ref.'&action=view"'.$linkclose.'>';
+            $lien = '<a href="'.DOL_URL_ROOT.'/mymodule/Skeleton_card.php?ref='.$ref.'&action=view">';
         }else{
             $lien =  "";
         }
         $lienfin=empty($lien)?'':'</a>';
 
-    	$picto='generic';
-        $label = '<u>' . $langs->trans("spread") . '</u>';
-        $label.= '<br>';
+    	$picto='Skeleton@mymodule';
+        
         if($ref){
-            $label.=$langs->trans("Red").': '.$ref;
+            $label=$langs->trans("Show").': '.$ref;
         }else if($id){
-            $label.=$langs->trans("#").': '.$id;
+            $label=$langs->trans("Show").': '.$id;
         }
-        
-        
-        
     	if ($withpicto==1){ 
             $result.=($lien.img_object($label,$picto).$htmlcontent.$lienfin);
         }else if ($withpicto==2) {
@@ -295,68 +277,7 @@ class Skeleton_Class extends CommonObject
             $result.=$lien.$htmlcontent.$lienfin;
         }
     	return $result;
-    }  
-    
-    /**
-	 *  Retourne le libelle du status d'un user (actif, inactif)
-	 *
-	 *  @param	int		$mode          0=libelle long, 1=libelle court, 2=Picto + Libelle court, 3=Picto, 4=Picto + Libelle long, 5=Libelle court + Picto
-	 *  @return	string 			       Label of status
-	 */
-	function getLibStatut($mode=0)
-	{
-		return $this->LibStatut($this->status,$mode);
-	}
-
-	/**
-	 *  Return the status
-	 *
-	 *  @param	int		$status        	Id status
-	 *  @param  int		$mode          	0=long label, 1=short label, 2=Picto + short label, 3=Picto, 4=Picto + long label, 5=Short label + Picto, 6=Long label + Picto
-	 *  @return string 			       	Label of status
-	 */
-	static function LibStatut($status,$mode=0)
-	{
-		global $langs;
-
-		if ($mode == 0)
-		{
-			$prefix='';
-			if ($status == 1) return $langs->trans('Enabled');
-			if ($status == 0) return $langs->trans('Disabled');
-		}
-		if ($mode == 1)
-		{
-			if ($status == 1) return $langs->trans('Enabled');
-			if ($status == 0) return $langs->trans('Disabled');
-		}
-		if ($mode == 2)
-		{
-			if ($status == 1) return img_picto($langs->trans('Enabled'),'statut4').' '.$langs->trans('Enabled');
-			if ($status == 0) return img_picto($langs->trans('Disabled'),'statut5').' '.$langs->trans('Disabled');
-		}
-		if ($mode == 3)
-		{
-			if ($status == 1) return img_picto($langs->trans('Enabled'),'statut4');
-			if ($status == 0) return img_picto($langs->trans('Disabled'),'statut5');
-		}
-		if ($mode == 4)
-		{
-			if ($status == 1) return img_picto($langs->trans('Enabled'),'statut4').' '.$langs->trans('Enabled');
-			if ($status == 0) return img_picto($langs->trans('Disabled'),'statut5').' '.$langs->trans('Disabled');
-		}
-		if ($mode == 5)
-		{
-			if ($status == 1) return $langs->trans('Enabled').' '.img_picto($langs->trans('Enabled'),'statut4');
-			if ($status == 0) return $langs->trans('Disabled').' '.img_picto($langs->trans('Disabled'),'statut5');
-		}
-		if ($mode == 6)
-		{
-			if ($status == 1) return $langs->trans('Enabled').' '.img_picto($langs->trans('Enabled'),'statut4');
-			if ($status == 0) return $langs->trans('Disabled').' '.img_picto($langs->trans('Disabled'),'statut5');
-		}
-	}
-
+    }    
     /**
      *  Delete object in database
      *
