@@ -140,7 +140,7 @@ function select_sellist($sqlarray=array('table'=> 'user','keyfield'=> 'rowid','f
                 $fieldtoshow='';
                 foreach($fields as $item){
                     if(!empty($fieldtoshow))$fieldtoshow.=$separator;
-                    $fieldtoshow.=$obj->{$label};
+                    $fieldtoshow.=$obj->{$item->label};
                 }
                 $selectOptions.= "<option value=\"".$obj->{$sqlarray['keyfield']}."\" ";
                 if($obj->{$sqlarray['keyfield']}==$selected){
@@ -232,7 +232,7 @@ function select_generic($table, $fieldValue,$htmlName,$fieldToShow1,$fieldToShow
                 $select='';
                 foreach($fields as $item){
                     if(!empty($select))$select.=$separator;
-                    $select.=$obj->{$label};
+                    $select.=$obj->{$item->label};
                 }     
             }else{
                 $select= "NULL";

@@ -75,7 +75,7 @@ if($posBs>0){
                                 $label='';
                 foreach($fields as $item){
                     if(!empty($label))$label.=$separator;
-                    $label.=$obj->{$label};
+                    $label.=$obj->{$item->label};
                 }    
                 $row_array['label'] =  $label;
                 $value=$obj->{$sqlarray['keyfield']};
