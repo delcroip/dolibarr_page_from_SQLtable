@@ -1,7 +1,8 @@
 <?php
 /* 
  * Copyright (C) 2007-2010 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) ---Put here your own copyright and developer email---
+ * Copyright (C) 2018	   Patrick DELCROIX     <pmpdelcroix@gmail.com>
+ * * Copyright (C) ---Put here your own copyright and developer email---
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,6 +69,7 @@ $cancel=GETPOST('cancel');
 $confirm=GETPOST('confirm');
 $tms= GETPOST('tms','alpha');
 //// Get parameters
+/*
 $sortfield = GETPOST('sortfield','alpha'); 
 $sortorder = GETPOST('sortorder','alpha')?GETPOST('sortorder','alpha'):'ASC';
 $removefilter=isset($_POST["removefilter_x"]) || isset($_POST["removefilter"]);
@@ -77,7 +79,7 @@ if (!$removefilter )		// Both test must be present to be compatible with all bro
     $ls_fields1=GETPOST('ls_fields1','int');
     $ls_fields2=GETPOST('ls_fields2','alpha');
 }
-
+*/
 
 
 
@@ -113,16 +115,14 @@ if($id>0)
     $object->id=$id; 
     $object->fetch($id);
     $ref=dol_sanitizeFileName($object->ref);
-    $upload_dir = $conf->mymodule->dir_output.'/'.get_exdir($object->id,2,0,0,$object,'Skeleton').$ref;
-    if(empty($action))$action='viewdoc'; //  the doc handling part send back only the ID without actions
+   
 }
 if(!empty($ref))
 {
     $object->ref=$ref; 
     $object->id=$id; 
-    $object->fetch($id);
+    $object->fetch($id,$ref);
     $ref=dol_sanitizeFileName($object->ref);
-    $upload_dir = $conf->mymodule->dir_output.'/'.get_exdir($object->id,2,0,0,$object,'Skeleton').$ref;
     
 }
 

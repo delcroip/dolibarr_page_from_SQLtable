@@ -527,6 +527,7 @@ $targetcontent=preg_replace('/\$element=\'skeleton\'/', '\$element=\''.$classmin
 $targetcontent=preg_replace('/\$table_element=\'skeleton\'/', '\$table_element=\''.$classmin.'\'', $targetcontent);
 $targetcontent=preg_replace('/Skeleton_Class/', $classname, $targetcontent);
 $targetcontent=preg_replace('/Skeleton/', $classname, $targetcontent);
+$targetcontent=preg_replace('/skeleton/', $classmin, $targetcontent);
 
 // Substitute comments
 $targetcontent=preg_replace('/This file is an example to create a new class file/', 'Put here description of this class', $targetcontent);
@@ -659,6 +660,11 @@ foreach($property as $key => $prop)
                 $varprop.=$prop['display'];
                 $varprop.="').' </td><td>';\n";
                 //suport the edit mode
+                if(strpos($prop['field'],'fk_') ===0){
+                        $varprop.="\t\t\$sql_".$prop['var']."=array('table'=> '".$prop['var']."','keyfield'=> rowid,'fields'=>'ref,label', 'join' => '', 'where'=>'','tail'=>'');\n";
+                        $varprop.="\t\t\$html_".$prop['var']."=array('name'=>'".$prop['display']."','class'=>'','otherparam'=>'','ajaxNbChar'=>'','separator'=> '-');\n";
+                        $varprop.="\t\t\$addChoices".$prop['var']."=null;\n";
+                }
                 $varprop.="\t\tif(\$edit==1){\n";
                 
 
@@ -681,13 +687,17 @@ foreach($property as $key => $prop)
                         $varprop.="\t\t\$fuser->fetch(\$object->".$prop['var'].");\n";
                         $varprop.="\t\tprint \$fuser->getNomUrl(1);\n";
                  }else if(strpos($prop['field'],'fk_') ===0) 
-                {                           
-                        $varprop.="\t\tprint select_generic('".$prop['var']."','rowid','";
-                        $varprop.= $prop['display']."','rowid','description',";
-                        $varprop.= "\$object->".$prop['var'].");\n";
+                { 
+
+                        $varprop.="\t\tprint select_sellist(\$sql_".$prop['var'].",\$html_".$prop['var'].", \$object->".$prop['var'].",\$addChoices_".$prop['var']." );\n";
+                     
+                       // $varprop.="\t\tprint select_generic('".$prop['var']."','rowid','";
+                       //$varprop.= $prop['display']."','rowid','description',";
+                       // $varprop.= "\$object->".$prop['var'].");\n";
                         $varprop.="\t\t}else{\n";
-                        $varprop.="\t\tprint print_generic('".$prop['var']."','rowid',";
-                        $varprop.="\$object->".$prop['var'].",'rowid','description');\n";
+                        $varprop.="\t\tprint_sellist(\$sql_".$prop['var'].",\$object->".$prop['var'].",'-');";
+                        //$varprop.="\t\tprint print_generic('".$prop['var']."','rowid',";
+                        //$varprop.="\$object->".$prop['var'].",'rowid','description');\n";
                 }else if(strpos($prop['type'],'enum')===0){
                         $varprop.="\t\tprint select_enum('{$tablenoprefix}','{$prop['field']}','";
                         $varprop.= $prop['display']."',";
@@ -796,9 +806,14 @@ foreach($property as $key => $prop)
             $varprop.= "\$ls_".$prop['var'].");\n";
                                 
         }else if(strpos($prop['field'],'fk_') ===0) {
-            $varprop.="\t\tprint select_generic('".$prop['var']."','rowid','";          
-            $varprop.= "ls_".$prop['var']."','rowid','description',";          
-            $varprop.= "\$ls_".$prop['var'].");\n";
+            $varprop.="\t\t\$sql_".$prop['var']."=array('table'=> '".$prop['var']."','keyfield'=> rowid,'fields'=>'ref,label', 'join' => '', 'where'=>'','tail'=>'');\n";
+            $varprop.="\t\t\$html_".$prop['var']."=array('name'=>'\$ls_".$prop['var']."','class'=>'','otherparam'=>'','ajaxNbChar'=>'','separator'=> '-');\n";
+            $varprop.="\t\t\$addChoices".$prop['var']."=null;\n";
+             $varprop.="\t\tprint select_sellist(\$sql_".$prop['var'].",\$html_".$prop['var'].", \$ls_".$prop['var'].",\$addChoices_".$prop['var']." );\n";
+            
+            //$varprop.="\t\tprint select_generic('".$prop['var']."','rowid','";          
+            //$varprop.= "ls_".$prop['var']."','rowid','description',";          
+            //$varprop.= "\$ls_".$prop['var'].");\n";
                                 
         }else if(strpos($prop['type'],'enum')===0){
             $varprop.="\t\tprint select_enum('{$tablenoprefix}','{$prop['field']}','";
@@ -851,7 +866,7 @@ if($prop['showfield']==true)
  }
 
 }
-$varprop.="\t\tprint '<td><a href=\"'.\$PHP_SELF.'?action=delete&id='.\$obj->rowid.'\">'.img_delete().'</a></td>';\n";
+$varprop.="\t\tprint '<td><a href=\"skeleton_card.php?action=delete&id='.\$obj->rowid.'\">'.img_delete().'</a></td>';\n";
 						
 $varprop.="\t\tprint \"</tr>\";\n";
 $targetcontent=preg_replace('/print "<tr><td>prop1<\/td><td>"\.\$obj->field1\."<\/td><\/tr>";/', $varprop, $targetcontent);

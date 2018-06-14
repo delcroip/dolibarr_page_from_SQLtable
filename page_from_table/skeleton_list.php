@@ -35,9 +35,9 @@
 //if (! defined('NOREQUIREHTML'))  define('NOREQUIREHTML','1');			// If we don't need to load the html.form.class.php
 //if (! defined('NOREQUIREAJAX'))  define('NOREQUIREAJAX','1');
 //if (! defined("NOLOGIN"))        define("NOLOGIN",'1');				// If this page is public (can be called outside logged session)
-$sublist=false;
+
 // Change this following line to use the correct relative path (../, ../../, etc)
-if(!$sublist)include '../core/lib/includeMain.lib.php';
+include '../core/lib/includeMain.lib.php';
 // Change this following line to use the correct relative path from htdocs
 //include_once(DOL_DOCUMENT_ROOT.'/core/class/formcompany.class.php');
 //require_once 'lib/mymodule.lib.php';
@@ -118,16 +118,13 @@ if($id>0)
     $object->id=$id; 
     $object->fetch($id);
     $ref=dol_sanitizeFileName($object->ref);
-    $upload_dir = $conf->mymodule->dir_output.'/'.get_exdir($object->id,2,0,0,$object,'Skeleton').$ref;
-    if(empty($action))$action='viewdoc'; //  the doc handling part send back only the ID without actions
 }
 if(!empty($ref))
 {
     $object->ref=$ref; 
     $object->id=$id; 
-    $object->fetch($id);
+    $object->fetch($id,$ref);
     $ref=dol_sanitizeFileName($object->ref);
-    $upload_dir = $conf->mymodule->dir_output.'/'.get_exdir($object->id,2,0,0,$object,'Skeleton').$ref;
     
 }
 
@@ -138,11 +135,10 @@ if(!empty($ref))
 * Put here all code to do according to value of "action" parameter
 ********************************************************************/
 
-// Action to add record
-
- 
- 
- if($action=='confirm_delete'){		
+         
+// Action to remove record
+ switch($action){
+    case 'confirm_delete':	
        $result=($confirm=='yes')?$object->delete($user):0;
        if ($result > 0)
        {
@@ -155,8 +151,15 @@ if(!empty($ref))
                if (! empty($object->errors)) setEventMessages(null,$object->errors,'errors');
                else setEventMessage('RecordNotDeleted','errors');
        }
-    }             
-
+       break;
+    case 'delete':
+        if( $action=='delete' && ($id>0 || $ref!="")){
+         $ret=$form->form_confirm(dol_buildpath('/project_cost/spread_card.php',1).'?action=confirm_delete&id='.$id,$langs->trans('DeleteSkeleton'),$langs->trans('ConfirmDelete'),'confirm_delete', '', 0, 1);
+         if ($ret == 'html') print '<br />';
+         //to have the object to be deleted in the background\
+        }
+      
+    } 
 
 /***************************************************
 * VIEW
@@ -164,7 +167,7 @@ if(!empty($ref))
 * Put here all code to build page
 ****************************************************/
 
-if(!$sublist)llxHeader('','Skeleton','');
+llxHeader('','Skeleton','');
 print "<div> <!-- module body-->";
 $form=new Form($db);
 $formother=new FormOther($db);
@@ -286,16 +289,16 @@ if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST))
     }
 
     print '</table>'."\n";
-    print '</from>'."\n";
+    print '</form>'."\n";
     // new button
     print '<a href="skeleton_card.php?action=create" class="butAction" role="button">'.$langs->trans('New');
     print ' '.$langs->trans('Skeleton')."</a>\n";
 
     
-dol_fiche_end();
+
 
 
 
 // End of page
-if(!$sublist)llxFooter();
-if(!$sublist)$db->close();
+llxFooter();
+$db->close();
