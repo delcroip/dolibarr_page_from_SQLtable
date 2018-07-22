@@ -192,7 +192,7 @@ class Skeleton_Class extends CommonObject
         // Put here code to add a control on parameters values
         // Update request
         $sql = "UPDATE ".MAIN_DB_PREFIX.$this->table_element." SET";
-        $sql.= $this->setSQLfields();
+        $sql.= $this->setSQLfields($user);
         $sql.= " WHERE rowid=".$this->id;
 	$this->db->begin();
 	dol_syslog(__METHOD__);
@@ -483,7 +483,7 @@ class Skeleton_Class extends CommonObject
      *
      *	@return	void
      */    
-    function setSQLfields(){
+    function setSQLfields($user){
         $sql='';
         $sql.= " field1=".(isset($this->field1)?"'".$this->db->escape($this->field1)."'":"null").",";
         $sql.= " field2=".(isset($this->field2)?"'".$this->db->escape($this->field2)."'":"null")."";
