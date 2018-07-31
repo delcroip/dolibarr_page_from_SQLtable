@@ -661,7 +661,7 @@ foreach($property as $key => $prop)
                 $varprop.="').' </td><td>';\n";
                 //suport the edit mode
                 if(strpos($prop['field'],'fk_') ===0){
-                        $varprop.="\t\t\$sql_".$prop['var']."=array('table'=> '".$prop['var']."','keyfield'=> rowid,'fields'=>'ref,label', 'join' => '', 'where'=>'','tail'=>'');\n";
+                        $varprop.="\t\t\$sql_".$prop['var']."=array('table'=> '".$prop['var']."','keyfield'=> 'rowid','fields'=>'ref,label', 'join' => '', 'where'=>'','tail'=>'');\n";
                         $varprop.="\t\t\$html_".$prop['var']."=array('name'=>'".$prop['display']."','class'=>'','otherparam'=>'','ajaxNbChar'=>'','separator'=> '-');\n";
                         $varprop.="\t\t\$addChoices".$prop['var']."=null;\n";
                 }
@@ -806,7 +806,7 @@ foreach($property as $key => $prop)
             $varprop.= "\$ls_".$prop['var'].");\n";
                                 
         }else if(strpos($prop['field'],'fk_') ===0) {
-            $varprop.="\t\t\$sql_".$prop['var']."=array('table'=> '".$prop['var']."','keyfield'=> rowid,'fields'=>'ref,label', 'join' => '', 'where'=>'','tail'=>'');\n";
+            $varprop.="\t\t\$sql_".$prop['var']."=array('table'=> '".$prop['var']."','keyfield'=> 'rowid','fields'=>'ref,label', 'join' => '', 'where'=>'','tail'=>'');\n";
             $varprop.="\t\t\$html_".$prop['var']."=array('name'=>'\$ls_".$prop['var']."','class'=>'','otherparam'=>'','ajaxNbChar'=>'','separator'=> '-');\n";
             $varprop.="\t\t\$addChoices".$prop['var']."=null;\n";
              $varprop.="\t\tprint select_sellist(\$sql_".$prop['var'].",\$html_".$prop['var'].", \$ls_".$prop['var'].",\$addChoices_".$prop['var']." );\n";
@@ -866,7 +866,7 @@ if($prop['showfield']==true)
  }
 
 }
-$varprop.="\t\tprint '<td><a href=\"skeleton_card.php?action=delete&id='.\$obj->rowid.'\">'.img_delete().'</a></td>';\n";
+$varprop.="\t\tprint '<td><a href=\"{$classmin}_card.php?action=delete&id='.\$obj->rowid.'\">'.img_delete().'</a></td>';\n";
 						
 $varprop.="\t\tprint \"</tr>\";\n";
 $targetcontent=preg_replace('/print "<tr><td>prop1<\/td><td>"\.\$obj->field1\."<\/td><\/tr>";/', $varprop, $targetcontent);

@@ -30,7 +30,8 @@ require_once(DOL_DOCUMENT_ROOT."/core/class/commonobject.class.php");
 //require_once(DOL_DOCUMENT_ROOT."/societe/class/societe.class.php");
 //require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
 
-
+$skeletonStatusPictoArray=array(0=> 'statut7',1=>'statut3',2=>'statut8',3=>'statut4');
+$skeletonStatusArray=array(0=> 'Draft',1=>'Validated',2=>'Cancelled',3 =>'Payed');
 /**
  *	Put here description of your class
  */
@@ -297,9 +298,19 @@ class Skeleton_Class extends CommonObject
         }
     	return $result;
     }  
-    
+     /**
+	 *  Retourne select libelle du status (actif, inactif)
+	 *
+	 *  @param	object 		$form          form object that should be created	
+      *  *  @return	string 			       html code to select status
+	 */
+	function selectLibStatut($form,$htmlname='Status')
+	{
+            global $skeletonStatusPictoArray,$skeletonStatusArray;
+            return $form->selectarray($htmlname,$skeletonStatusArray,$this->status);
+	}   
     /**
-	 *  Retourne le libelle du status d'un user (actif, inactif)
+	 *  Retourne le libelle du status (actif, inactif)
 	 *
 	 *  @param	int		$mode          0=libelle long, 1=libelle court, 2=Picto + Libelle court, 3=Picto, 4=Picto + Libelle long, 5=Libelle court + Picto
 	 *  @return	string 			       Label of status
@@ -308,7 +319,6 @@ class Skeleton_Class extends CommonObject
 	{
 		return $this->LibStatut($this->status,$mode);
 	}
-
 	/**
 	 *  Return the status
 	 *
@@ -318,43 +328,35 @@ class Skeleton_Class extends CommonObject
 	 */
 	static function LibStatut($status,$mode=0)
 	{
-		global $langs;
-
+		global $langs,$skeletonStatusPictoArray,$skeletonStatusArray;
 		if ($mode == 0)
 		{
 			$prefix='';
-			if ($status == 1) return $langs->trans('Enabled');
-			if ($status == 0) return $langs->trans('Disabled');
+			return $langs->trans($skeletonStatusArray[$status]);
 		}
 		if ($mode == 1)
 		{
-			if ($status == 1) return $langs->trans('Enabled');
-			if ($status == 0) return $langs->trans('Disabled');
+			return $langs->trans($skeletonStatusArray[$status]);
 		}
 		if ($mode == 2)
 		{
-			if ($status == 1) return img_picto($langs->trans('Enabled'),'statut4').' '.$langs->trans('Enabled');
-			if ($status == 0) return img_picto($langs->trans('Disabled'),'statut5').' '.$langs->trans('Disabled');
+			 return img_picto($skeletonStatusArray[$status],$skeletonStatusPictoArray[$status]).' '.$langs->trans($skeletonStatusArray[$status]);
 		}
 		if ($mode == 3)
 		{
-			if ($status == 1) return img_picto($langs->trans('Enabled'),'statut4');
-			if ($status == 0) return img_picto($langs->trans('Disabled'),'statut5');
+			 return img_picto($skeletonStatusArray[$status],$skeletonStatusPictoArray[$status]);
 		}
 		if ($mode == 4)
 		{
-			if ($status == 1) return img_picto($langs->trans('Enabled'),'statut4').' '.$langs->trans('Enabled');
-			if ($status == 0) return img_picto($langs->trans('Disabled'),'statut5').' '.$langs->trans('Disabled');
+			 return img_picto($skeletonStatusArray[$status],$skeletonStatusPictoArray[$status]).' '.$langs->trans($skeletonStatusArray[$status]);
 		}
 		if ($mode == 5)
 		{
-			if ($status == 1) return $langs->trans('Enabled').' '.img_picto($langs->trans('Enabled'),'statut4');
-			if ($status == 0) return $langs->trans('Disabled').' '.img_picto($langs->trans('Disabled'),'statut5');
+			 return $langs->trans($skeletonStatusArray[$status]).' '.img_picto($skeletonStatusArray[$status],$skeletonStatusPictoArray[$status]);
 		}
 		if ($mode == 6)
 		{
-			if ($status == 1) return $langs->trans('Enabled').' '.img_picto($langs->trans('Enabled'),'statut4');
-			if ($status == 0) return $langs->trans('Disabled').' '.img_picto($langs->trans('Disabled'),'statut5');
+			 return $langs->trans($skeletonStatusArray[$status]).' '.img_picto($skeletonStatusArray[$status],$skeletonStatusPictoArray[$status]);
 		}
 	}
 

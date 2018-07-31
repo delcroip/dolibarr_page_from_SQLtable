@@ -140,7 +140,7 @@ if ($cancel){
 }else if (($action == 'add') || ($action == 'update' && ($id>0 || !empty($ref))))
 {
     //block resubmit
-    if(empty($tms) || (!isset($_SESSION['Skeleton_'.$tms]))){
+    if(empty($tms) || (!isset($_SESSION['Skeleton'][$tms]))){
             setEventMessage('WrongTimeStamp_requestNotExpected', 'errors');
             $action=($action=='add')?'create':'view';
     }
@@ -171,7 +171,7 @@ if ($cancel){
         if ($result > 0)
         {
             // Creation OK
-            unset($_SESSION['Skeleton_'.$tms]);
+            unset($_SESSION['Skeleton'][$tms]);
             setEventMessage('RecordUpdated','mesgs');
 
         }
@@ -212,7 +212,7 @@ if ($cancel){
         {
                 // Creation OK
             // remove the tms
-               unset($_SESSION['Skeleton_'.$tms]);
+               unset($_SESSION['Skeleton'][$tms]);
                setEventMessage('RecordSucessfullyCreated', 'mesgs');
                SkeletonReloadPage($backtopage,$result,'');
 
@@ -245,14 +245,14 @@ if ($cancel){
           
  }             
 //Removing the tms array so the order can't be submitted two times
-if(isset( $_SESSION['skeleton_'.$tms]))
+if(isset( $_SESSION['Skeleton'][$tms]))
 {
-    unset($_SESSION['skeleton_'.$tms]);
+    unset($_SESSION['Skeleton'][$tms]);
 }
 if(($action == 'create') || ($action == 'edit' && ($id>0 || !empty($ref)))){
     $tms=getToken();
-    $_SESSION['skeleton_'.$tms]=array();
-    $_SESSION['skeleton_'.$tms]['action']=$action;
+    $_SESSION['Skeleton'][$tms]=array();
+    $_SESSION['Skeleton'][$tms]['action']=$action;
             
 }
 
@@ -318,7 +318,7 @@ switch ($action) {
             print '<input type="hidden" name="backtopage" value="'.$backtopage.'">';
 
         }else {// show the nav bar
-            $basedurl=dirname($PHP_SELF).'/skeleton_list.php';
+            $basedurl=dol_buildpath("/project_cost/skeleton_list.php", 1);
             $linkback = '<a href="'.$basedurl.(! empty($socid)?'?socid='.$socid:'').'">'.$langs->trans("BackToList").'</a>';
             if(!isset($object->ref))//save ref if any
                 $object->ref=$object->id;
