@@ -651,8 +651,9 @@ foreach($property as $key => $prop)
 {
 	if ($prop['showfield']==true)
 	{
-                $varprop.="\t\tprint \"<tr>\\n\";\n";
+                
                 $varprop.="\n// show the field ".$prop['var']."\n\n";
+                $varprop.="\t\tprint \"<tr>\\n\";\n";
                 if ($prop['null']=='YES') //value required
                     $varprop.="\t\tprint '<td>'.\$langs->trans('";
                 else
