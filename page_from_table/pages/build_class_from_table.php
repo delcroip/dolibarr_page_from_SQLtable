@@ -824,8 +824,8 @@ if($prop['showfield']==true)
  {
     
     if($prop['istime']){
-        $varprop.="\t\tprint \"<td>\".dol_print_date(\$obj->";
-        $varprop.=$prop['field'].",'day').\"</td>\";\n";      
+        $varprop.="\t\tprint \"<td>\".dol_print_date(\$db->jdate(\$obj->";
+        $varprop.=$prop['field']."),'day').\"</td>\";\n";      
     }else if(strpos($prop['field'],'fk_user') ===0) {
         $varprop.="\t\tprint \"<td>\".print_generic('user','rowid',";
         $varprop.="\$obj->".$prop['field'].",'lastname','firstname',' ').\"</td>\";\n";

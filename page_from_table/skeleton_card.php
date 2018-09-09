@@ -50,10 +50,6 @@ dol_include_once('/core/lib/functions2.lib.php');
 dol_include_once('/core/lib/files.lib.php');
 //dol_include_once('/core/lib/images.lib.php');
 dol_include_once('/core/class/html.formfile.class.php');
-// include conditionnally of the dolibarr version
-//if((version_compare(DOL_VERSION, "3.8", "<"))){
-dol_include_once('/mymodule/lib/mymodule.lib.php');
-//}
 dol_include_once('/core/class/html.formother.class.php');
 $PHP_SELF=$_SERVER['PHP_SELF'];
 // Load traductions files requiredby by page

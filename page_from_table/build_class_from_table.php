@@ -120,7 +120,8 @@ if ($resql)
 			$property[$i]['istime']=false;
 		}
 		if (preg_match('/varchar/i',$property[$i]['type'])
-			|| preg_match('/text/i',$property[$i]['type']))
+			|| preg_match('/text/i',$property[$i]['type'])
+                        || preg_match('/note/i',$property[$i]['field']))
 		{
 			$property[$i]['ischar']=true;
 		}
@@ -309,7 +310,7 @@ foreach($property as $key => $prop)
                         $varprop.='NOW() ';
                 }else if($prop['var']=='user_creation' ||$prop['var']=='user_author' || $prop['var']=='user_creat'){
 //                        $varprop.='\'".\$user->id."\'';
-                        $varprop.="\"'.\$user->id.'\"";
+                        $varprop.="\''.\$user->id.'\'";
                        // $varprop.='{\$user->id}'; //FIXME ?
                 }else if ($prop['istime'])
 		{
@@ -696,7 +697,7 @@ foreach($property as $key => $prop)
                        //$varprop.= $prop['display']."','rowid','description',";
                        // $varprop.= "\$object->".$prop['var'].");\n";
                         $varprop.="\t\t}else{\n";
-                        $varprop.="\t\tprint_sellist(\$sql_".$prop['var'].",\$object->".$prop['var'].",'-');";
+                        $varprop.="\t\tprint print_sellist(\$sql_".$prop['var'].",\$object->".$prop['var'].",'-');";
                         //$varprop.="\t\tprint print_generic('".$prop['var']."','rowid',";
                         //$varprop.="\$object->".$prop['var'].",'rowid','description');\n";
                 }else if(strpos($prop['type'],'enum')===0){
@@ -838,7 +839,7 @@ $targetcontent=preg_replace('/print \'<td><input type="text" name="ls_fields2" v
  */
 $varprop='';
 
-$varprop.="\t\tprint \"<tr class=\\\"oddeven')\\\"  onclick=\\\"location.href='\";\n";
+$varprop.="\t\tprint \"<tr class=\\\"oddeven\\\"  onclick=\\\"location.href='\";\n";
 $varprop.="\tprint \$basedurl.\$obj->rowid.\"'\\\" >\";\n";
 foreach($property as $key => $prop)
 {
@@ -846,8 +847,8 @@ if($prop['showfield']==true)
  {
     
     if($prop['istime']){
-        $varprop.="\t\tprint \"<td>\".dol_print_date(\$obj->";
-        $varprop.=$prop['field'].",'day').\"</td>\";\n";      
+        $varprop.="\t\tprint \"<td>\".dol_print_date(\$db->jdate(\$obj->";
+        $varprop.=$prop['field']."),'day').\"</td>\";\n";      
     }else if(strpos($prop['field'],'fk_user') ===0) {
         $varprop.="\t\tprint \"<td>\".print_generic('user','rowid',";
         $varprop.="\$obj->".$prop['field'].",'lastname','firstname',' ').\"</td>\";\n";
