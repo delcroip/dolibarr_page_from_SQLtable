@@ -392,6 +392,8 @@ class Skeleton_Class extends CommonObject
         dol_syslog(__METHOD__);
         $resql = $this->db->query($sql);
         if (! $resql) { $error++; $this->errors[]="Error ".$this->db->lasterror(); }
+        else if ($this->db->affected_rows($resql)==0){$error++;$this->errors[]="Item no found in database"; }
+
         }
 
 // Commit or rollback
