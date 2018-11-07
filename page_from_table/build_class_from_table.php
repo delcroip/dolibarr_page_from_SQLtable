@@ -665,7 +665,7 @@ foreach($property as $key => $prop)
                 if(strpos($prop['field'],'fk_') ===0){
                         $varprop.="\t\t\$sql_".$prop['var']."=array('table'=> '".$prop['var']."','keyfield'=> 'rowid','fields'=>'ref,label', 'join' => '', 'where'=>'','tail'=>'');\n";
                         $varprop.="\t\t\$html_".$prop['var']."=array('name'=>'".$prop['display']."','class'=>'','otherparam'=>'','ajaxNbChar'=>'','separator'=> '-');\n";
-                        $varprop.="\t\t\$addChoices".$prop['var']."=null;\n";
+                        $varprop.="\t\t\$addChoices_".$prop['var']."=null;\n";
                 }
                 $varprop.="\t\tif(\$edit==1){\n";
                 
@@ -810,7 +810,7 @@ foreach($property as $key => $prop)
         }else if(strpos($prop['field'],'fk_') ===0) {
             $varprop.="\t\t\$sql_".$prop['var']."=array('table'=> '".$prop['var']."','keyfield'=> 'rowid','fields'=>'ref,label', 'join' => '', 'where'=>'','tail'=>'');\n";
             $varprop.="\t\t\$html_".$prop['var']."=array('name'=>'\$ls_".$prop['var']."','class'=>'','otherparam'=>'','ajaxNbChar'=>'','separator'=> '-');\n";
-            $varprop.="\t\t\$addChoices".$prop['var']."=null;\n";
+            $varprop.="\t\t\$addChoices_".$prop['var']."=null;\n";
              $varprop.="\t\tprint select_sellist(\$sql_".$prop['var'].",\$html_".$prop['var'].", \$ls_".$prop['var'].",\$addChoices_".$prop['var']." );\n";
             
             //$varprop.="\t\tprint select_generic('".$prop['var']."','rowid','";          
