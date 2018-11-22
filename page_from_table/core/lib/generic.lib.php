@@ -153,8 +153,7 @@ function select_sellist($sqlarray=array('table'=> 'user','keyfield'=> 'rowid','f
                 foreach($fields as $item){
                     if(!empty($fieldtoshow))$fieldtoshow.=$separator;
                     $fieldtoshow.=$obj->{$item['label']};
-                   var_dump($item['label']);
-                } 
+               } 
                 $selectOptions.= "<option value=\"".$obj->{$labelKey}."\" ";
                 if($obj->{$labelKey}==$selected){
                      $selectOptions.='selected=\"selected\"';
