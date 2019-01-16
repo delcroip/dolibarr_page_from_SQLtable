@@ -493,6 +493,54 @@ class Skeleton_Class extends CommonObject
         $sql.= " field2=".(isset($this->field2)?"'".$this->db->escape($this->field2)."'":"null")."";
         return $sql;
     }
+    /*
+    * function to save a skeleton as a string
+    * @param    int     $mode   0=>serialize, 1=> json_encode, 2 => json_encode PRETTY PRINT 
+    * @return   string       serialized object
+    */
+    public function serialize($mode=0){
+       $ret='';
+       $array= array();
+       $array['field1']= $this->field1;
+       $array['field2']= $this->field2;
 
-
+        switch($mode)
+        {
+            default:
+            case 0:
+                $ret=  serialize($array);
+                break;
+            case 1:
+                $ret=json_encode($array);
+                break;
+            case 2:
+                $ret=json_encode($array, JSON_PRETTY_PRINT);
+                break;
+        }
+         return $ret;
+    }
+     /* function to load a skeleton as a string
+     * @param   string    $str   serialized object
+     * @param    int     $mode   0=>serialize, 1=> json_encode, 2 => json_encode PRETTY PRINT
+     * @return  int              OK
+     */    
+       public function unserialize($str,$mode=0){
+       $ret='';
+       $array= array();
+        switch($mode)
+        {
+            default:
+            case 0:
+                $array= unserialize($array);
+                break;
+            case 1:
+            case 2:
+                $array=json_decode($array);
+                break;
+        }
+        // automatic unserialisation based on match between property name and key value
+        foreach ($array as $key => $value) {
+            if(isset($this->{$key}))$this->{$key}=$value;
+        }
+    }
 }

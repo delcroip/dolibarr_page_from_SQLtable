@@ -269,7 +269,7 @@ foreach($property as $key => $prop)
 {
 	if ($prop['insertfield'] ||$prop['updatefield'])
 	{
-		$varprop.="\t\tif (!empty(\$this->".$prop['var'].")) \$this->".$prop['var']."=trim(\$this->".$prop['var'].");";
+		$varprop.="\tif (!empty(\$this->".$prop['var'].")) \$this->".$prop['var']."=trim(\$this->".$prop['var'].");";
 		$varprop.="\n";
 	}
 }
@@ -285,7 +285,7 @@ foreach($property as $key => $prop)
 	$i++;
 	if ($prop['insertfield'])
 	{
-		$varprop.="\t\t\$sql.= '".$prop['field'];
+		$varprop.="\t\$sql.= '".$prop['field'];
                 if($i<$lastinsertfield)
                     $varprop.=",";
                 $varprop.="';\n";
@@ -304,7 +304,7 @@ foreach($property as $key => $prop)
 	$i++;
 	if ($prop['insertfield'])
 	{
-		$varprop.="\t\t\$sql.=' ";
+		$varprop.="\t\$sql.=' ";
 		
                 if($prop['var']=='date_creation' ||$prop['var']=='date_creat' || $prop['var']=='datec'){
                         $varprop.='NOW() ';
@@ -350,7 +350,7 @@ foreach($property as $key => $prop)
 	{
 //FIXME the " should be removed in oder to avoid string processing as much as possible when page load
                 
-                $varprop.="\t\t\$sql.=' ";
+                $varprop.="\t\$sql.=' ";
                 $varprop.=$prop['field'].'=';
                 if($prop['var']=='date_modification'||$prop['var']=='date_modif'){
                     $varprop.='NOW() ';
@@ -395,7 +395,7 @@ foreach($property as $key => $prop)
     $i++;
     if ($prop['field'] != 'rowid')
     {
-        $varpropselect.="\t\t\$sql.=' ";
+        $varpropselect.="\t\$sql.=' ";
         $varpropselect.="t.".$prop['field'];
         if ($i < count($property)) $varpropselect.=",";
         $varpropselect.="';";
@@ -415,7 +415,7 @@ foreach($property as $key => $prop)
 	$i++;
 	if ($prop['field'] != 'rowid' && $prop['field'] != 'id')
 	{
-		$varprop.="\t\t\t\t\$this->".$prop['var']." = ";
+		$varprop.="\t\t\$this->".$prop['var']." = ";
 		if ($prop['istime']) $varprop.='$this->db->jdate(';
 		$varprop.='$obj->'.$prop['field'];
 		if ($prop['istime']) $varprop.=')';
@@ -434,12 +434,27 @@ foreach($property as $key => $prop)
 {
 	if ($prop['field'] != 'rowid' && $prop['field'] != 'id')
 	{
-		$varprop.="\t\t\$this->".$prop['var']."='';";
+		$varprop.="\t\$this->".$prop['var']."='';";
 		$varprop.="\n";
 	}
 }
 $targetcontent=preg_replace('/\$this->prop1=\'prop1\';/', $varprop, $targetcontent);
 $targetcontent=preg_replace('/\$this->prop2=\'prop2\';/', '', $targetcontent);
+// Substitute serialize parameters
+$varprop="\n";
+$cleanparam='';
+foreach($property as $key => $prop)
+{
+	if ($prop['insertfield'] ||$prop['updatefield'])
+	{
+		$varprop.="\t\$array['".$prop['var']."']=\$this->".$prop['var'].";";
+		$varprop.="\n";
+	}
+}
+$targetcontent=preg_replace('/\$array\[\'field1\'\]= \$this->field1;/', $varprop, $targetcontent);
+$targetcontent=preg_replace('/\$array\[\'field2\'\]= \$this->field2;/', '', $targetcontent);
+
+
 // Build file
 $fp=fopen($outfile,"w");
 if ($fp)
@@ -548,7 +563,7 @@ foreach($property as $key => $prop)
     $i++;
     if ($prop['showfield'] ==true)
     {
-        $varpropselect.="\t\t\$sql.=' ";
+        $varpropselect.="\t\$sql.=' ";
         $varpropselect.="t.".$prop['field'];
         if ($i < $lastshowfield) $varpropselect.=",";
         $varpropselect.="';";
@@ -569,12 +584,12 @@ foreach($property as $key => $prop)
     if ($prop['showfield']==true){
         if($prop['istime'])
         {
-            $varpropget.="\t\t\$object->".$prop['var']."=dol_mktime(0, 0, 0,";
+            $varpropget.="\t\$object->".$prop['var']."=dol_mktime(0, 0, 0,";
             $varpropget.='GETPOST(\''.$prop['display']."month'),";
             $varpropget.='GETPOST(\''.$prop['display']."day'),";
             $varpropget.='GETPOST(\''.$prop['display']."year'));\n";
         }else{
-            $varpropget.="\t\t\$object->".$prop['var']."=GETPOST('";
+            $varpropget.="\t\$object->".$prop['var']."=GETPOST('";
             $varpropget.=$prop['display']."');\n";
             
         }
@@ -654,81 +669,81 @@ foreach($property as $key => $prop)
 	{
                 
                 $varprop.="\n// show the field ".$prop['var']."\n\n";
-                $varprop.="\t\tprint \"<tr>\\n\";\n";
+                $varprop.="\tprint \"<tr>\\n\";\n";
                 if ($prop['null']=='YES') //value required
-                    $varprop.="\t\tprint '<td>'.\$langs->trans('";
+                    $varprop.="\tprint '<td>'.\$langs->trans('";
                 else
-                    $varprop.="\t\tprint '<td class=\"fieldrequired\">'.\$langs->trans('";
+                    $varprop.="\tprint '<td class=\"fieldrequired\">'.\$langs->trans('";
                 $varprop.=$prop['display'];
                 $varprop.="').' </td><td>';\n";
                 //suport the edit mode
                 if(strpos($prop['field'],'fk_') ===0){
-                        $varprop.="\t\t\$sql_".$prop['var']."=array('table'=> '".$prop['var']."','keyfield'=> 'rowid','fields'=>'ref,label', 'join' => '', 'where'=>'','tail'=>'');\n";
-                        $varprop.="\t\t\$html_".$prop['var']."=array('name'=>'".$prop['display']."','class'=>'','otherparam'=>'','ajaxNbChar'=>'','separator'=> '-');\n";
-                        $varprop.="\t\t\$addChoices_".$prop['var']."=null;\n";
+                        $varprop.="\t\$sql_".$prop['var']."=array('table'=> '".$prop['var']."','keyfield'=> 'rowid','fields'=>'ref,label', 'join' => '', 'where'=>'','tail'=>'');\n";
+                        $varprop.="\t\$html_".$prop['var']."=array('name'=>'".$prop['display']."','class'=>'','otherparam'=>'','ajaxNbChar'=>'','separator'=> '-');\n";
+                        $varprop.="\t\$addChoices_".$prop['var']."=null;\n";
                 }
-                $varprop.="\t\tif(\$edit==1){\n";
+                $varprop.="\tif(\$edit==1){\n";
                 
 
                 if ($prop['istime']){
-                    $varprop.="\t\tif(\$new==1){\n";
-                    $varprop.="\t\t\tprint \$form->select_date(-1,'";
+                    $varprop.="\tif(\$new==1){\n";
+                    $varprop.="\t\tprint \$form->select_date(-1,'";
                     $varprop.=$prop['display']."');\n";
-                    $varprop.="\t\t}else{\n";                                               
-                    $varprop.="\t\t\tprint \$form->select_date(\$object->";
+                    $varprop.="\t}else{\n";                                               
+                    $varprop.="\t\tprint \$form->select_date(\$object->";
                     $varprop.=$prop['var'].",'";
                     $varprop.=$prop['display']."');\n";  
-                    $varprop.="\t\t}\n\t\t}else{\n";
-                    $varprop.="\t\t\tprint dol_print_date(\$object->";
+                    $varprop.="\t}\n\t}else{\n";
+                    $varprop.="\t\tprint dol_print_date(\$object->";
                     $varprop.=$prop['var'].",'day');\n";
                 }else if(strpos($prop['field'],'user')===0 || strpos($prop['field'],'fk_user') ===0) 
                  {
-                        $varprop.="\t\tprint \$form->select_dolusers(\$object->".$prop['var'].", '";
+                        $varprop.="\tprint \$form->select_dolusers(\$object->".$prop['var'].", '";
                         $varprop.=$prop['display']."', 1, '', 0 );\n";
-                        $varprop.="\t\t}else{\n";
-                        $varprop.="\t\t\$fuser->fetch(\$object->".$prop['var'].");\n";
-                        $varprop.="\t\tprint \$fuser->getNomUrl(1);\n";
+                        $varprop.="\t}else{\n";
+                        $varprop.="\t\$fuser->fetch(\$object->".$prop['var'].");\n";
+                        $varprop.="\tprint \$fuser->getNomUrl(1);\n";
                  }else if(strpos($prop['field'],'fk_') ===0) 
                 { 
 
-                        $varprop.="\t\tprint select_sellist(\$sql_".$prop['var'].",\$html_".$prop['var'].", \$object->".$prop['var'].",\$addChoices_".$prop['var']." );\n";
+                        $varprop.="\tprint select_sellist(\$sql_".$prop['var'].",\$html_".$prop['var'].", \$object->".$prop['var'].",\$addChoices_".$prop['var']." );\n";
                      
-                       // $varprop.="\t\tprint select_generic('".$prop['var']."','rowid','";
+                       // $varprop.="\tprint select_generic('".$prop['var']."','rowid','";
                        //$varprop.= $prop['display']."','rowid','description',";
                        // $varprop.= "\$object->".$prop['var'].");\n";
-                        $varprop.="\t\t}else{\n";
-                        $varprop.="\t\tprint print_sellist(\$sql_".$prop['var'].",\$object->".$prop['var'].",'-');";
-                        //$varprop.="\t\tprint print_generic('".$prop['var']."','rowid',";
+                        $varprop.="\t}else{\n";
+                        $varprop.="\tprint print_sellist(\$sql_".$prop['var'].",\$object->".$prop['var'].",'-');";
+                        //$varprop.="\tprint print_generic('".$prop['var']."','rowid',";
                         //$varprop.="\$object->".$prop['var'].",'rowid','description');\n";
                 }else if(strpos($prop['type'],'enum')===0){
-                        $varprop.="\t\tprint select_enum('{$tablenoprefix}','{$prop['field']}','";
+                        $varprop.="\tprint select_enum('{$tablenoprefix}','{$prop['field']}','";
                         $varprop.= $prop['display']."',";
                         $varprop.= "\$object->".$prop['var'].");\n";
-                        $varprop.="\t\t}else{\n";
-                        $varprop.="\t\tprint \$langs->trans(\$object->".$prop['var'].");\n";
+                        $varprop.="\t}else{\n";
+                        $varprop.="\tprint \$langs->trans(\$object->".$prop['var'].");\n";
                 }else                            
                 {
                         if(!empty($prop['default'])){
-                            $varprop.="\t\tif (\$new==1)\n";
-                            $varprop.="\t\t\tprint '<input type=\"text\" value=\"";
+                            $varprop.="\tif (\$new==1)\n";
+                            $varprop.="\t\tprint '<input type=\"text\" value=\"";
                             $varprop.=$prop['default']."\" name=\"";
                             $varprop.=$prop['display'];
-                            $varprop.="\">';\n\t\telse\n\t";
+                            $varprop.="\">';\n\telse\n\t";
                         }
-                        $varprop.="\t\t\tprint '<input type=\"text\" value=\"'.\$object->";
+                        $varprop.="\t\tprint '<input type=\"text\" value=\"'.\$object->";
                         $varprop.=$prop['var'].".'\" name=\"";
                         $varprop.=$prop['display']."\">';\n";  
 
-                        $varprop.="\t\t}else{\n";
-                        $varprop.="\t\t\tprint \$object->";
+                        $varprop.="\t}else{\n";
+                        $varprop.="\t\tprint \$object->";
                         $varprop.=$prop['var'].";\n";
                 }
 
-                $varprop.="\t\t}\n";
-                $varprop.="\t\tprint \"</td>\";\n";
+                $varprop.="\t}\n";
+                $varprop.="\tprint \"</td>\";\n";
                 
-//                $varprop.=( $i%2==1)?"\t\tprint \"\\n</tr>\\n\";\n":'';
-                $varprop.="\t\tprint \"\\n</tr>\\n\";\n";
+//                $varprop.=( $i%2==1)?"\tprint \"\\n</tr>\\n\";\n":'';
+                $varprop.="\tprint \"\\n</tr>\\n\";\n";
                 $i++;
 	}
         
@@ -736,7 +751,7 @@ foreach($property as $key => $prop)
 //if there is an unpair number of line
 if($i%2==1)
 {
-    $varprop.="\t\tprint \"<td></td></tr>\\n\";\n";
+    $varprop.="\tprint \"<td></td></tr>\\n\";\n";
                 
 }
 
@@ -804,21 +819,21 @@ foreach($property as $key => $prop)
             $varprop.="\t\$formother->select_year(\$syear?\$syear:-1,'ls_".$prop['var']."_year',1, 20, 5);\n";
 
         }else if(strpos($prop['field'],'fk_user') ===0||strpos($prop['field'],'user') ===0) {//FIXME select user instead
-            $varprop.="\t\tprint \$form->select_dolusers('".$prop['var']."',";                
+            $varprop.="\tprint \$form->select_dolusers('".$prop['var']."',";                
             $varprop.= "\$ls_".$prop['var'].");\n";
                                 
         }else if(strpos($prop['field'],'fk_') ===0) {
-            $varprop.="\t\t\$sql_".$prop['var']."=array('table'=> '".$prop['var']."','keyfield'=> 'rowid','fields'=>'ref,label', 'join' => '', 'where'=>'','tail'=>'');\n";
-            $varprop.="\t\t\$html_".$prop['var']."=array('name'=>'\$ls_".$prop['var']."','class'=>'','otherparam'=>'','ajaxNbChar'=>'','separator'=> '-');\n";
-            $varprop.="\t\t\$addChoices_".$prop['var']."=null;\n";
-             $varprop.="\t\tprint select_sellist(\$sql_".$prop['var'].",\$html_".$prop['var'].", \$ls_".$prop['var'].",\$addChoices_".$prop['var']." );\n";
+            $varprop.="\t\$sql_".$prop['var']."=array('table'=> '".$prop['var']."','keyfield'=> 'rowid','fields'=>'ref,label', 'join' => '', 'where'=>'','tail'=>'');\n";
+            $varprop.="\t\$html_".$prop['var']."=array('name'=>'\$ls_".$prop['var']."','class'=>'','otherparam'=>'','ajaxNbChar'=>'','separator'=> '-');\n";
+            $varprop.="\t\$addChoices_".$prop['var']."=null;\n";
+             $varprop.="\tprint select_sellist(\$sql_".$prop['var'].",\$html_".$prop['var'].", \$ls_".$prop['var'].",\$addChoices_".$prop['var']." );\n";
             
-            //$varprop.="\t\tprint select_generic('".$prop['var']."','rowid','";          
+            //$varprop.="\tprint select_generic('".$prop['var']."','rowid','";          
             //$varprop.= "ls_".$prop['var']."','rowid','description',";          
             //$varprop.= "\$ls_".$prop['var'].");\n";
                                 
         }else if(strpos($prop['type'],'enum')===0){
-            $varprop.="\t\tprint select_enum('{$tablenoprefix}','{$prop['field']}','";
+            $varprop.="\tprint select_enum('{$tablenoprefix}','{$prop['field']}','";
             $varprop.= "ls_".$prop['var']."',";
             $varprop.= "\$ls_".$prop['var'].");\n";            
         }else
@@ -839,7 +854,7 @@ $targetcontent=preg_replace('/print \'<td><input type="text" name="ls_fields2" v
  */
 $varprop='';
 
-$varprop.="\t\tprint \"<tr class=\\\"oddeven\\\"  onclick=\\\"location.href='\";\n";
+$varprop.="\tprint \"<tr class=\\\"oddeven\\\"  onclick=\\\"location.href='\";\n";
 $varprop.="\tprint \$basedurl.\$obj->rowid.\"'\\\" >\";\n";
 foreach($property as $key => $prop)
 {
@@ -847,30 +862,30 @@ if($prop['showfield']==true)
  {
     
     if($prop['istime']){
-        $varprop.="\t\tprint \"<td>\".dol_print_date(\$db->jdate(\$obj->";
+        $varprop.="\tprint \"<td>\".dol_print_date(\$db->jdate(\$obj->";
         $varprop.=$prop['field']."),'day').\"</td>\";\n";      
     }else if(strpos($prop['field'],'fk_user') ===0) {
-        $varprop.="\t\tprint \"<td>\".print_generic('user','rowid',";
+        $varprop.="\tprint \"<td>\".print_generic('user','rowid',";
         $varprop.="\$obj->".$prop['field'].",'lastname','firstname',' ').\"</td>\";\n";
     }else if(strpos($prop['field'],'fk_') ===0) {
-        $varprop.="\t\tprint \"<td>\".print_generic('".$prop['var']."','rowid',";
+        $varprop.="\tprint \"<td>\".print_generic('".$prop['var']."','rowid',";
         $varprop.="\$obj->".$prop['field'].",'rowid','description').\"</td>\";\n";
     }else if($prop['field']=='id' || $prop['field']=='rowid'){
-        $varprop.="\t\tprint \"<td>\".\$object->getNomUrl(\$obj->rowid,\$obj->rowid,'',1).\"</td>\";\n";
+        $varprop.="\tprint \"<td>\".\$object->getNomUrl(\$obj->rowid,\$obj->rowid,'',1).\"</td>\";\n";
     }else if($prop['field']=='ref'){
-        $varprop.="\t\tprint \"<td>\".\$object->getNomUrl(\$obj->ref,'',\$obj->ref,0).\"</td>\";\n";
+        $varprop.="\tprint \"<td>\".\$object->getNomUrl(\$obj->ref,'',\$obj->ref,0).\"</td>\";\n";
     }else if(strpos($prop['type'],'enum')===0)
     {                     
-        $varprop.="\t\tprint \"<td>\".\$langs->trans(\$obj->".$prop['field'].").\"</td>\";\n";
+        $varprop.="\tprint \"<td>\".\$langs->trans(\$obj->".$prop['field'].").\"</td>\";\n";
     }else{                     
-        $varprop.="\t\tprint \"<td>\".\$obj->".$prop['field'].".\"</td>\";\n";
+        $varprop.="\tprint \"<td>\".\$obj->".$prop['field'].".\"</td>\";\n";
     }
  }
 
 }
-$varprop.="\t\tprint '<td><a href=\"{$classmin}_card.php?action=delete&id='.\$obj->rowid.'\">'.img_delete().'</a></td>';\n";
+$varprop.="\tprint '<td><a href=\"{$classmin}_card.php?action=delete&id='.\$obj->rowid.'\">'.img_delete().'</a></td>';\n";
 						
-$varprop.="\t\tprint \"</tr>\";\n";
+$varprop.="\tprint \"</tr>\";\n";
 $targetcontent=preg_replace('/print "<tr><td>prop1<\/td><td>"\.\$obj->field1\."<\/td><\/tr>";/', $varprop, $targetcontent);
 $targetcontent=preg_replace('/print "<tr><td>prop2<\/td><td>"\.\$obj->field2\."<\/td><\/tr>";/', '', $targetcontent);
 
