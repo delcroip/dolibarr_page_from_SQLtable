@@ -678,7 +678,11 @@ foreach($property as $key => $prop)
                 $varprop.="').' </td><td>';\n";
                 //suport the edit mode
                 if(strpos($prop['field'],'fk_') ===0){
-                        $varprop.="\t\$sql_".$prop['var']."=array('table'=> '".$prop['var']."','keyfield'=> 'rowid','fields'=>'ref,label', 'join' => '', 'where'=>'','tail'=>'');\n";
+                        $table= $prop['var'];
+                        if($prop['var']=='project') $table='projet';
+                        else if($prop['var']=='third_party' ||$prop['var']=='soc' ) $table='societe';
+                        else if($prop['var']=='invoice'  ) $table='facture';        
+                        $varprop.="\t\$sql_".$prop['var']."=array('table'=> '".$table."','keyfield'=> 'rowid','fields'=>'ref,label', 'join' => '', 'where'=>'','tail'=>'');\n";
                         $varprop.="\t\$html_".$prop['var']."=array('name'=>'".$prop['display']."','class'=>'','otherparam'=>'','ajaxNbChar'=>'','separator'=> '-');\n";
                         $varprop.="\t\$addChoices_".$prop['var']."=null;\n";
                 }
@@ -703,7 +707,20 @@ foreach($property as $key => $prop)
                         $varprop.="\t}else{\n";
                         $varprop.="\t\$fuser->fetch(\$object->".$prop['var'].");\n";
                         $varprop.="\tprint \$fuser->getNomUrl(1);\n";
-                 }else if(strpos($prop['field'],'fk_') ===0) 
+                 }/*else if(strpos($prop['field'],'fk_soc')===0 || strpos($prop['field'],'fk_third_party')===0 )
+                    {
+                        $varprop.="if(\$obj->".$prop['field'].">0){\n";
+                        $varprop.="\$societe = new Societe(\$db);\n";
+                        $varprop.="\$societe->fetch(\$obj->".$prop['field'].");\n";
+                        $varprop.=" print \$societe->getNomUrl(1,'');}\n";
+                        $varprop.="\t}else{\n";
+                        $varprop.="if(\$obj->".$prop['field'].">0){\n";
+                        $varprop.="\$societe = new Societe(\$db);\n";
+                        $varprop.="\$societe->fetch(\$obj->".$prop['field'].");\n";
+                        $varprop.=" print \$societe->getNomUrl(1,'');}\n";
+                         $varprop.="print '</td>';\n";
+                        //$varprop.="\tprint \"<td>\".\$langs->trans(\$obj->".$prop['field'].").\"</td>\";\n";
+                    }*/else if(strpos($prop['field'],'fk_') ===0) 
                 { 
 
                         $varprop.="\tprint select_sellist(\$sql_".$prop['var'].",\$html_".$prop['var'].", \$object->".$prop['var'].",\$addChoices_".$prop['var']." );\n";
