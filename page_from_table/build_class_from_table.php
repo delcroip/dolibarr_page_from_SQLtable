@@ -824,7 +824,7 @@ foreach($property as $key => $prop)
                                 
         }else if(strpos($prop['field'],'fk_') ===0) {
             $varprop.="\t\$sql_".$prop['var']."=array('table'=> '".$prop['var']."','keyfield'=> 'rowid','fields'=>'ref,label', 'join' => '', 'where'=>'','tail'=>'');\n";
-            $varprop.="\t\$html_".$prop['var']."=array('name'=>'\$ls_".$prop['var']."','class'=>'','otherparam'=>'','ajaxNbChar'=>'','separator'=> '-');\n";
+            $varprop.="\t\$html_".$prop['var']."=array('name'=>'ls_".$prop['var']."','class'=>'','otherparam'=>'','ajaxNbChar'=>'','separator'=> '-');\n";
             $varprop.="\t\$addChoices_".$prop['var']."=null;\n";
              $varprop.="\tprint select_sellist(\$sql_".$prop['var'].",\$html_".$prop['var'].", \$ls_".$prop['var'].",\$addChoices_".$prop['var']." );\n";
             
@@ -865,18 +865,33 @@ if($prop['showfield']==true)
         $varprop.="\tprint \"<td>\".dol_print_date(\$db->jdate(\$obj->";
         $varprop.=$prop['field']."),'day').\"</td>\";\n";      
     }else if(strpos($prop['field'],'fk_user') ===0) {
-        $varprop.="\tprint \"<td>\".print_generic('user','rowid',";
-        $varprop.="\$obj->".$prop['field'].",'lastname','firstname',' ').\"</td>\";\n";
+        //$varprop.="\tprint \"<td>\".print_generic('user','rowid',";
+        //$varprop.="\$obj->".$prop['field'].",'lastname','firstname',' ').\"</td>\";\n";
+        $varprop.="print '<td>';\n";
+        $varprop.="if(\$obj->".$prop['field'].">0){";
+        $varprop.="\t\$huser=new User(\$db);\n";
+	$varprop.="\t\$huser->fetch(\$obj->".$prop['field'].")\n";
+	$varprop.="\tprint \$huser->getNomUrl(1);}\n";
+        $varprop.="print '</td>';\n";
+        
+    }else if(strpos($prop['field'],'fk_soc')===0 || strpos($prop['field'],'fk_third_party')===0 )
+    {                     
+        $varprop.="print '<td>';\n";
+        $varprop.="if(\$obj->".$prop['field'].">0){";
+        $varprop.="\$societe = new Societe(\$db);\n";
+        $varprop.="\$societe->fetch(\$obj->".$prop['field'].");\n";
+        $varprop.=" print \$societe->getNomUrl(1,'');}\n";
+         $varprop.="print '</td>';\n";
+        //$varprop.="\tprint \"<td>\".\$langs->trans(\$obj->".$prop['field'].").\"</td>\";\n";
     }else if(strpos($prop['field'],'fk_') ===0) {
-        $varprop.="\tprint \"<td>\".print_generic('".$prop['var']."','rowid',";
-        $varprop.="\$obj->".$prop['field'].",'rowid','description').\"</td>\";\n";
+        //$varprop.="\tprint \"<td>\".print_generic('".$prop['var']."','rowid',";
+        //$varprop.="\$obj->".$prop['field'].",'rowid','description').\"</td>\";\n";
+        $varprop.="\tprint select_sellist(\$sql_".$prop['var'].",\$html_".$prop['var'].", \$ls_".$prop['var'].",\$addChoices_".$prop['var']." );\n";
+
     }else if($prop['field']=='id' || $prop['field']=='rowid'){
         $varprop.="\tprint \"<td>\".\$object->getNomUrl(\$obj->rowid,\$obj->rowid,'',1).\"</td>\";\n";
     }else if($prop['field']=='ref'){
         $varprop.="\tprint \"<td>\".\$object->getNomUrl(\$obj->ref,'',\$obj->ref,0).\"</td>\";\n";
-    }else if(strpos($prop['type'],'enum')===0)
-    {                     
-        $varprop.="\tprint \"<td>\".\$langs->trans(\$obj->".$prop['field'].").\"</td>\";\n";
     }else{                     
         $varprop.="\tprint \"<td>\".\$obj->".$prop['field'].".\"</td>\";\n";
     }

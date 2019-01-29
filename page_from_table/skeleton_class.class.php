@@ -503,7 +503,7 @@ class Skeleton_Class extends CommonObject
        $array= array();
        $array['field1']= $this->field1;
        $array['field2']= $this->field2;
-
+       $array['processedTime']= mktime();
         switch($mode)
         {
             default:
@@ -531,11 +531,11 @@ class Skeleton_Class extends CommonObject
         {
             default:
             case 0:
-                $array= unserialize($array);
+                $array= unserialize($str);
                 break;
             case 1:
             case 2:
-                $array=json_decode($array);
+                $array=json_decode($str);
                 break;
         }
         // automatic unserialisation based on match between property name and key value
