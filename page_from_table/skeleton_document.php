@@ -23,7 +23,7 @@
  *  \brief      Tab for documents linked to Skeleton
  */
 
-if($_SERVER['SCRIPT_FILENAME'])include 'core/lib/includeMain.lib.php';
+include 'core/lib/includeMain.lib.php';
 
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';

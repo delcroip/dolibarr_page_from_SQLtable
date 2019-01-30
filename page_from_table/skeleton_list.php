@@ -38,7 +38,7 @@
 //if (! defined("NOLOGIN"))        define("NOLOGIN",'1');				// If this page is public (can be called outside logged session)
 
 // Change this following line to use the correct relative path (../, ../../, etc)
-include '../core/lib/includeMain.lib.php';
+include 'core/lib/includeMain.lib.php';
 // Change this following line to use the correct relative path from htdocs
 //include_once(DOL_DOCUMENT_ROOT.'/core/class/formcompany.class.php');
 //require_once 'lib/mymodule.lib.php';
@@ -51,6 +51,7 @@ dol_include_once('/core/lib/files.lib.php');
 //dol_include_once('/core/lib/images.lib.php');
 dol_include_once('/core/class/html.formfile.class.php');
 dol_include_once('/core/class/html.formother.class.php');
+dol_include_once('/core/class/html.formprojet.class.php');
 $PHP_SELF=$_SERVER['PHP_SELF'];
 // Load traductions files requiredby by page
 //$langs->load("companies");
@@ -131,8 +132,9 @@ if(!empty($ref))
 *
 * Put here all code to do according to value of "action" parameter
 ********************************************************************/
-
-         
+$form=new Form($db);
+$formother=new FormOther($db);
+$formproject=new FormProjets($db);         
 // Action to remove record
  switch($action){
     case 'confirm_delete':	
@@ -166,8 +168,7 @@ if(!empty($ref))
 
 llxHeader('','Skeleton','');
 print "<div> <!-- module body-->";
-$form=new Form($db);
-$formother=new FormOther($db);
+
 $fuser=new User($db);
 // Put here content of your page
 

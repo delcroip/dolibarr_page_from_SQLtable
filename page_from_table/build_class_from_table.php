@@ -129,7 +129,8 @@ if ($resql)
 		{
 			$property[$i]['ischar']=false;
 		}
-                
+                $property[$i]['class'] = getClassName($property[$i]['var']);
+                $property[$i]['select'] = getSelectFunction($property[$i]['class']);
                 $addfield=1;
                 if($property[$i]['var']=='id') $addfield=0;
                 if($property[$i]['var']=='entity') $addfield=0;
@@ -677,37 +678,29 @@ foreach($property as $key => $prop)
                 $varprop.=$prop['display'];
                 $varprop.="').' </td><td>';\n";
                 //suport the edit mode
-                if(strpos($prop['field'],'fk_') ===0){
-                        $table= $prop['var'];
-                        if($prop['var']=='project') $table='projet';
-                        else if($prop['var']=='third_party' ||$prop['var']=='soc' ) $table='societe';
-                        else if($prop['var']=='invoice'  ) $table='facture';        
-                        $varprop.="\t\$sql_".$prop['var']."=array('table'=> '".$table."','keyfield'=> 'rowid','fields'=>'ref,label', 'join' => '', 'where'=>'','tail'=>'');\n";
-                        $varprop.="\t\$html_".$prop['var']."=array('name'=>'".$prop['display']."','class'=>'','otherparam'=>'','ajaxNbChar'=>'','separator'=> '-');\n";
-                        $varprop.="\t\$addChoices_".$prop['var']."=null;\n";
-                }
+
                 $varprop.="\tif(\$edit==1){\n";
                 
 
                 if ($prop['istime']){
                     $varprop.="\tif(\$new==1){\n";
-                    $varprop.="\t\tprint \$form->select_date(-1,'";
+                    $varprop.="\t\t\tprint \$form->select_date(-1,'";
                     $varprop.=$prop['display']."');\n";
-                    $varprop.="\t}else{\n";                                               
-                    $varprop.="\t\tprint \$form->select_date(\$object->";
+                    $varprop.="\t\t}else{\n";                                               
+                    $varprop.="\t\t\tprint \$form->select_date(\$object->";
                     $varprop.=$prop['var'].",'";
                     $varprop.=$prop['display']."');\n";  
-                    $varprop.="\t}\n\t}else{\n";
-                    $varprop.="\t\tprint dol_print_date(\$object->";
+                    $varprop.="\t\t}\n\t}else{\n";
+                    $varprop.="\t\t\tprint dol_print_date(\$object->";
                     $varprop.=$prop['var'].",'day');\n";
-                }else if(strpos($prop['field'],'user')===0 || strpos($prop['field'],'fk_user') ===0) 
+                }/*else if(strpos($prop['field'],'user')===0 || strpos($prop['field'],'fk_user') ===0) 
                  {
                         $varprop.="\tprint \$form->select_dolusers(\$object->".$prop['var'].", '";
                         $varprop.=$prop['display']."', 1, '', 0 );\n";
                         $varprop.="\t}else{\n";
                         $varprop.="\t\$fuser->fetch(\$object->".$prop['var'].");\n";
                         $varprop.="\tprint \$fuser->getNomUrl(1);\n";
-                 }/*else if(strpos($prop['field'],'fk_soc')===0 || strpos($prop['field'],'fk_third_party')===0 )
+                 }else if(strpos($prop['field'],'fk_soc')===0 || strpos($prop['field'],'fk_third_party')===0 )
                     {
                         $varprop.="if(\$obj->".$prop['field'].">0){\n";
                         $varprop.="\$societe = new Societe(\$db);\n";
@@ -723,29 +716,37 @@ foreach($property as $key => $prop)
                     }*/else if(strpos($prop['field'],'fk_') ===0) 
                 { 
 
-                        $varprop.="\tprint select_sellist(\$sql_".$prop['var'].",\$html_".$prop['var'].", \$object->".$prop['var'].",\$addChoices_".$prop['var']." );\n";
-                     
-                       // $varprop.="\tprint select_generic('".$prop['var']."','rowid','";
-                       //$varprop.= $prop['display']."','rowid','description',";
-                       // $varprop.= "\$object->".$prop['var'].");\n";
-                        $varprop.="\t}else{\n";
-                        $varprop.="\tprint print_sellist(\$sql_".$prop['var'].",\$object->".$prop['var'].",'-');";
-                        //$varprop.="\tprint print_generic('".$prop['var']."','rowid',";
-                        //$varprop.="\$object->".$prop['var'].",'rowid','description');\n";
+                    if($prop['select']!=''){
+                        $varprop.="\t\t\$selected=\$object->".$prop['var'].";\n";
+                        $varprop.="\t\t\$htmlname='".$prop['display']."';\n";
+                         $varprop.="\t\t".$prop['select'];
+                    }else{
+                        $varprop.="\t\$sql_".$prop['var']."=array('table'=> '".$table."','keyfield'=> 'rowid','fields'=>'ref,label', 'join' => '', 'where'=>'','tail'=>'');\n";
+                        $varprop.="\t\$html_".$prop['var']."=array('name'=>'".$prop['display']."','class'=>'','otherparam'=>'','ajaxNbChar'=>'','separator'=> '-');\n";
+                        $varprop.="\t\$addChoices_".$prop['var']."=null;\n";
+                        $varprop.="\t\tprint select_sellist(\$sql_".$prop['var'].",\$html_".$prop['var'].", \$object->".$prop['var'].",\$addChoices_".$prop['var']." );\n";
+                    }
+                    $varprop.="\t}else{\n";
+                    $varprop.="\t\tif(class_exist('".$prop['class']."')){\n";
+                    $varprop.="\t\t\t\$StaticObject= New ".$prop['class']."(\$db);\n"   ; 
+                    $varprop.="\t\t\tprint \"<td>\".\$StaticObject->getNomUrl('1',\$object->".$prop['field'].").\"</td>\";\n"   ;         
+                    $varprop.="\t\t}else{\n";
+                    $varprop.="\t\t\tprint print_sellist(\$sql_".$prop['var'].",\$object->".$prop['field'].");\n";
+                    $varprop.="\t\t}\n";
                 }else if(strpos($prop['type'],'enum')===0){
-                        $varprop.="\tprint select_enum('{$tablenoprefix}','{$prop['field']}','";
+                        $varprop.="\t\tprint select_enum('{$tablenoprefix}','{$prop['field']}','";
                         $varprop.= $prop['display']."',";
                         $varprop.= "\$object->".$prop['var'].");\n";
                         $varprop.="\t}else{\n";
-                        $varprop.="\tprint \$langs->trans(\$object->".$prop['var'].");\n";
+                        $varprop.="\t\tprint \$langs->trans(\$object->".$prop['var'].");\n";
                 }else                            
                 {
                         if(!empty($prop['default'])){
-                            $varprop.="\tif (\$new==1)\n";
-                            $varprop.="\t\tprint '<input type=\"text\" value=\"";
+                            $varprop.="\t\tif (\$new==1)\n";
+                            $varprop.="\t\t\tprint '<input type=\"text\" value=\"";
                             $varprop.=$prop['default']."\" name=\"";
                             $varprop.=$prop['display'];
-                            $varprop.="\">';\n\telse\n\t";
+                            $varprop.="\">';\n\t\telse\n\t";
                         }
                         $varprop.="\t\tprint '<input type=\"text\" value=\"'.\$object->";
                         $varprop.=$prop['var'].".'\" name=\"";
@@ -840,10 +841,19 @@ foreach($property as $key => $prop)
             $varprop.= "\$ls_".$prop['var'].");\n";
                                 
         }else if(strpos($prop['field'],'fk_') ===0) {
-            $varprop.="\t\$sql_".$prop['var']."=array('table'=> '".$prop['var']."','keyfield'=> 'rowid','fields'=>'ref,label', 'join' => '', 'where'=>'','tail'=>'');\n";
-            $varprop.="\t\$html_".$prop['var']."=array('name'=>'ls_".$prop['var']."','class'=>'','otherparam'=>'','ajaxNbChar'=>'','separator'=> '-');\n";
-            $varprop.="\t\$addChoices_".$prop['var']."=null;\n";
-             $varprop.="\tprint select_sellist(\$sql_".$prop['var'].",\$html_".$prop['var'].", \$ls_".$prop['var'].",\$addChoices_".$prop['var']." );\n";
+
+            if($prop['select']!=''){
+                $varprop.="\t\t\$selected=\$ls_".$prop['var'].";\n";
+                $varprop.="\t\t\$htmlname='ls_".$prop['var']."';\n";
+                $varprop.="\t\t".$prop['select'];
+            }else{
+                $varprop.="\t\$sql_".$prop['var']."=array('table'=> '".strtolower($prop['class'])."','keyfield'=> 'rowid','fields'=>'ref,label', 'join' => '', 'where'=>'','tail'=>'');\n";
+                $varprop.="\t\$html_".$prop['var']."=array('name'=>'ls_".$prop['var']."','class'=>'','otherparam'=>'','ajaxNbChar'=>'','separator'=> '-');\n";
+                $varprop.="\t\$addChoices_".$prop['var']."=null;\n";
+                $varprop.="\t\tprint select_sellist(\$sql_".$prop['var'].",\$html_".$prop['var'].", \$ls_".$prop['var'].",\$addChoices_".$prop['var']." );\n";
+            }
+
+
             
             //$varprop.="\tprint select_generic('".$prop['var']."','rowid','";          
             //$varprop.= "ls_".$prop['var']."','rowid','description',";          
@@ -881,30 +891,15 @@ if($prop['showfield']==true)
     if($prop['istime']){
         $varprop.="\tprint \"<td>\".dol_print_date(\$db->jdate(\$obj->";
         $varprop.=$prop['field']."),'day').\"</td>\";\n";      
-    }else if(strpos($prop['field'],'fk_user') ===0) {
-        //$varprop.="\tprint \"<td>\".print_generic('user','rowid',";
-        //$varprop.="\$obj->".$prop['field'].",'lastname','firstname',' ').\"</td>\";\n";
-        $varprop.="print '<td>';\n";
-        $varprop.="if(\$obj->".$prop['field'].">0){";
-        $varprop.="\t\$huser=new User(\$db);\n";
-	$varprop.="\t\$huser->fetch(\$obj->".$prop['field'].")\n";
-	$varprop.="\tprint \$huser->getNomUrl(1);}\n";
-        $varprop.="print '</td>';\n";
-        
-    }else if(strpos($prop['field'],'fk_soc')===0 || strpos($prop['field'],'fk_third_party')===0 )
-    {                     
-        $varprop.="print '<td>';\n";
-        $varprop.="if(\$obj->".$prop['field'].">0){";
-        $varprop.="\$societe = new Societe(\$db);\n";
-        $varprop.="\$societe->fetch(\$obj->".$prop['field'].");\n";
-        $varprop.=" print \$societe->getNomUrl(1,'');}\n";
-         $varprop.="print '</td>';\n";
-        //$varprop.="\tprint \"<td>\".\$langs->trans(\$obj->".$prop['field'].").\"</td>\";\n";
     }else if(strpos($prop['field'],'fk_') ===0) {
         //$varprop.="\tprint \"<td>\".print_generic('".$prop['var']."','rowid',";
         //$varprop.="\$obj->".$prop['field'].",'rowid','description').\"</td>\";\n";
-        $varprop.="\tprint select_sellist(\$sql_".$prop['var'].",\$html_".$prop['var'].", \$ls_".$prop['var'].",\$addChoices_".$prop['var']." );\n";
-
+        $varprop.="\tif(class_exist('".$prop['class']."')){\n";
+        $varprop.="\t\t\$StaticObject= New ".$prop['class']."(\$db);\n"   ; 
+        $varprop.="\t\tprint \"<td>\".\$StaticObject->getNomUrl('1',\$obj->".$prop['field'].").\"</td>\";\n"   ;         
+        $varprop.="\t}else{\n";
+        $varprop.="\t\tprint print_sellist(\$sql_".$prop['var'].",\$obj->".$prop['field'].");\n";
+        $varprop.="\t}\n";
     }else if($prop['field']=='id' || $prop['field']=='rowid'){
         $varprop.="\tprint \"<td>\".\$object->getNomUrl(\$obj->rowid,\$obj->rowid,'',1).\"</td>\";\n";
     }else if($prop['field']=='ref'){
@@ -938,3 +933,103 @@ else $error++;
 
 print "You can now rename generated files by removing the 'out.' prefix in their name and store them into directory /yourmodule/class.\n";
 return $error;
+ function getClassName($name){
+     $type=strtolower(str_replace('_','', $name));
+    $link='';
+    switch ($type){
+        case "supplier":
+        case "fournisseur":    
+            $type="Fournisseur";
+            //if (!class_exists($name)) break;
+            break;
+        case "customer":
+        case "thirdparty":
+        case "societe":
+           $type="Societe";
+            break;
+        case "invoice": 
+        case "facture": 
+        case "invoicecustomer":
+        case "customerinvoice":
+           $type="Facture";
+            break;               
+        case "invoicesupplier":
+        case "supplierinvoice": 
+        case "facturefourn": 
+            $type="FactureFournisseur";
+            break;  
+        case "expense":
+            
+            break;
+        case "bankaccount":
+            $type="Account";
+            break;
+        case "salary":
+            $type="PaymentSalary";
+            break;
+        case "order":
+        case "customerorder":
+        case "ordercustomer":
+            $type="Commande";
+            break;
+        case "supplierorder":
+        case "ordersupplier":
+            $type="FactureFournisseur";
+            break;
+        case "subscriber":
+            $type="Adherent";
+            break;
+        case "donation":
+            $type="Don";
+            break;
+        case "charge":
+        case "healthcareexpense":    
+            $type="Chargesociales";
+           break;
+        case "payment":
+            $type= "Paiement";
+            break;
+        case "vat":
+            $type="TVA";
+            break;
+        case "user":
+        case "utilisateur":
+            $type='User';
+        case 'project':
+        case 'projet':  
+            $type='Project';
+            break;
+        case 'task':
+            $type='Task';
+            break;
+        default:
+            $type=ucfirst($type);
+            if(strpos('user',$name)===0) $type='User';
+            break;
+
+    }
+
+    
+    return $type;
+}
+
+function getSelectFunction($class){
+   $select='';
+    switch($class){
+        
+        case 'Societe':
+        case 'Fournisseur':
+            $select="\$form->select_company(\$selected,\$htmlname);\n";
+            break;
+        case 'User':
+            $select="\$form->select_dolusers(\$selected,\$htmlname);\n";
+        break;
+        case 'Product':
+            $select="\$form->select_produits(\$selected,\$htmlname);\n";
+            break;
+        case 'Project':
+            $select="\$formproject->select_projects(-1,\$selected,\$htmlname);\n";
+            break;
+    }
+    return $select;
+}
