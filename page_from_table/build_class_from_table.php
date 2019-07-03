@@ -727,7 +727,7 @@ foreach($property as $key => $prop)
                         $varprop.="\t\tprint select_sellist(\$sql_".$prop['var'].",\$html_".$prop['var'].", \$object->".$prop['var'].",\$addChoices_".$prop['var']." );\n";
                     }
                     $varprop.="\t}else{\n";
-                    $varprop.="\t\tif(class_exist('".$prop['class']."')){\n";
+                    $varprop.="\t\tif(class_exists('".$prop['class']."')){\n";
                     $varprop.="\t\t\t\$StaticObject= New ".$prop['class']."(\$db);\n"   ; 
                     $varprop.="\t\t\tprint \"<td>\".\$StaticObject->getNomUrl('1',\$object->".$prop['field'].").\"</td>\";\n"   ;         
                     $varprop.="\t\t}else{\n";
@@ -894,7 +894,7 @@ if($prop['showfield']==true)
     }else if(strpos($prop['field'],'fk_') ===0) {
         //$varprop.="\tprint \"<td>\".print_generic('".$prop['var']."','rowid',";
         //$varprop.="\$obj->".$prop['field'].",'rowid','description').\"</td>\";\n";
-        $varprop.="\tif(class_exist('".$prop['class']."')){\n";
+        $varprop.="\tif(class_exists('".$prop['class']."')){\n";
         $varprop.="\t\t\$StaticObject= New ".$prop['class']."(\$db);\n"   ; 
         $varprop.="\t\tprint \"<td>\".\$StaticObject->getNomUrl('1',\$obj->".$prop['field'].").\"</td>\";\n"   ;         
         $varprop.="\t}else{\n";
