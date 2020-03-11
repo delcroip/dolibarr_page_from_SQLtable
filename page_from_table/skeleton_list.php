@@ -52,32 +52,32 @@ dol_include_once('/core/lib/files.lib.php');
 dol_include_once('/core/class/html.formfile.class.php');
 dol_include_once('/core/class/html.formother.class.php');
 dol_include_once('/core/class/html.formprojet.class.php');
-$PHP_SELF=$_SERVER['PHP_SELF'];
+$PHP_SELF = $_SERVER['PHP_SELF'];
 // Load traductions files requiredby by page
 //$langs->load("companies");
 $langs->load("skeleton@mymodule");
 
 // Get parameter
-$id			= GETPOST('id','int');
-$ref                    = GETPOST('ref','alpha');
-$action		= GETPOST('action','alpha');
+$id			 = GETPOST('id','int');
+$ref = GETPOST('ref','alpha');
+$action		 = GETPOST('action','alpha');
 $backtopage = GETPOST('backtopage');
-$cancel=GETPOST('cancel');
-$confirm=GETPOST('confirm');
-$tms= GETPOST('tms','alpha');
+$cancel = GETPOST('cancel');
+$confirm = GETPOST('confirm');
+$tms = GETPOST('tms','alpha');
 //// Get parameters
 $sortfield = GETPOST('sortfield','alpha'); 
 $sortorder = GETPOST('sortorder','alpha')?GETPOST('sortorder','alpha'):'ASC';
-$removefilter=isset($_POST["removefilter_x"]) || isset($_POST["removefilter"]);
-//$applyfilter=isset($_POST["search_x"]) ;//|| isset($_POST["search"]);
+$removefilter = isset($_POST["removefilter_x"]) || isset($_POST["removefilter"]);
+//$applyfilter = isset($_POST["search_x"]) ;//|| isset($_POST["search"]);
 if (!$removefilter )		// Both test must be present to be compatible with all browsers
 {
-    $ls_fields1=GETPOST('ls_fields1','int');
-    $ls_fields2=GETPOST('ls_fields2','alpha');
+    $ls_fields1 = GETPOST('ls_fields1','int');
+    $ls_fields2 = GETPOST('ls_fields2','alpha');
 }
 
 
-$page = GETPOST('page','int'); 
+if ($page == -1 || !is_numeric($page))  { $page = 0; }
 if ($page == -1) { $page = 0; }
 $limit = GETPOST('limit','int')?GETPOST('limit','int'):$conf->liste_limit;
 $offset = $limit * $page;
@@ -91,7 +91,7 @@ $pagenext = $page + 1;
 //if(isset( $_SESSION['skeleton_class'][$tms]))
 //{
 
- //   $cancel=TRUE;
+ //   $cancel = TRUE;
  //  setEventMessages('Internal error, POST not exptected', null, 'errors');
 //}
 
@@ -100,29 +100,29 @@ $pagenext = $page + 1;
 // Right Management
  /*
 if ($user->societe_id > 0 || 
-       (!$user->rights->mymodule->add && ($action=='add' || $action='create')) ||
-       (!$user->rights->mymodule->view && ($action=='list' || $action='view')) ||
-       (!$user->rights->mymodule->delete && ($action=='confirm_delete')) ||
-       (!$user->rights->mymodule->edit && ($action=='edit' || $action='update')))
+       (!$user->rights->mymodule->add && ($action == 'add' || $action = 'create')) ||
+       (!$user->rights->mymodule->view && ($action == 'list' || $action = 'view')) ||
+       (!$user->rights->mymodule->delete && ($action == 'confirm_delete')) ||
+       (!$user->rights->mymodule->edit && ($action == 'edit' || $action = 'update')))
 {
 	accessforbidden();
 }
 */
 
 // create object and set id or ref if provided as parameter
-$object=new Skeleton_Class($db);
+$object = new Skeleton_Class($db);
 if($id>0)
 {
-    $object->id=$id; 
+    $object->id = $id; 
     $object->fetch($id);
-    $ref=dol_sanitizeFileName($object->ref);
+    $ref = dol_sanitizeFileName($object->ref);
 }
 if(!empty($ref))
 {
-    $object->ref=$ref; 
-    $object->id=$id; 
+    $object->ref = $ref; 
+    $object->id = $id; 
     $object->fetch($id,$ref);
-    $ref=dol_sanitizeFileName($object->ref);
+    $ref = dol_sanitizeFileName($object->ref);
     
 }
 
@@ -132,13 +132,13 @@ if(!empty($ref))
 *
 * Put here all code to do according to value of "action" parameter
 ********************************************************************/
-$form=new Form($db);
-$formother=new FormOther($db);
-$formproject=new FormProjets($db);         
+$form = new Form($db);
+$formother = new FormOther($db);
+$formproject = new FormProjets($db);         
 // Action to remove record
  switch($action){
     case 'confirm_delete':	
-       $result=($confirm=='yes')?$object->delete($user):0;
+       $result = ($confirm == 'yes')?$object->delete($user):0;
        if ($result > 0)
        {
                // Delete OK
@@ -152,8 +152,8 @@ $formproject=new FormProjets($db);
        }
        break;
     case 'delete':
-        if( $action=='delete' && ($id>0 || $ref!="")){
-         $ret=$form->form_confirm(dol_buildpath('/mymodule/Skeleton_card.php',1).'?action=confirm_delete&id='.$id,$langs->trans('DeleteSkeleton'),$langs->trans('ConfirmDelete'),'confirm_delete', '', 0, 1);
+        if( $action == 'delete' && ($id>0 || $ref != "")){
+         $ret = $form->form_confirm(dol_buildpath('/mymodule/Skeleton_card.php',1).'?action = confirm_delete&id = '.$id,$langs->trans('DeleteSkeleton'),$langs->trans('ConfirmDelete'),'confirm_delete', '', 0, 1);
          if ($ret == 'html') print '<br />';
          //to have the object to be deleted in the background\
         }
@@ -169,11 +169,11 @@ $formproject=new FormProjets($db);
 llxHeader('','Skeleton','');
 print "<div> <!-- module body-->";
 
-$fuser=new User($db);
+$fuser = new User($db);
 // Put here content of your page
 
 // Example : Adding jquery code
-/*print '<script type="text/javascript" language="javascript">
+/*print '<script type = "text/javascript" language = "javascript">
 jQuery(document).ready(function() {
 	function init_myfunc()
 	{
@@ -189,13 +189,13 @@ jQuery(document).ready(function() {
 
 
     $sql = 'SELECT';
-    $sql.= ' t.rowid,';
-    $sql.= " t.field1,";
-    $sql.= " t.field2";
-    $sql.= ' FROM '.MAIN_DB_PREFIX.'mytable as t';
-    $sqlwhere='';
+    $sql .= ' t.rowid,';
+    $sql .= " t.field1,";
+    $sql .= " t.field2";
+    $sql .= ' FROM '.MAIN_DB_PREFIX.'mytable as t';
+    $sqlwhere = '';
     if(isset($object->entity))
-        $sqlwhere.= ' AND t.entity = '.$conf->entity;
+        $sqlwhere .= ' AND t.entity = '.$conf->entity;
     if ($filter && $filter != -1)		// GETPOST('filtre') may be a string
     {
             $filtrearr = explode(',', $filter);
@@ -210,63 +210,63 @@ jQuery(document).ready(function() {
     if ($ls_fields2) $sqlwhere .= natural_search('t.fields2', $ls_fields2);
     //list limit
     if(!empty($sqlwhere))
-        $sql.=' WHERE '.substr ($sqlwhere, 5);
+        $sql .= ' WHERE '.substr ($sqlwhere, 5);
     
 // Count total nb of records
 $nbtotalofrecords = 0;
 if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST))
 {
-        $sqlcount='SELECT COUNT(*) as count FROM '.MAIN_DB_PREFIX.'mytable as t';
+        $sqlcount = 'SELECT COUNT(*) as count FROM '.MAIN_DB_PREFIX.'mytable as t';
         if(!empty($sqlwhere))
-            $sqlcount.=' WHERE '.substr ($sqlwhere, 5);
+            $sqlcount .= ' WHERE '.substr ($sqlwhere, 5);
 	$result = $db->query($sqlcount);
         $nbtotalofrecords = ($result)?$objcount = $db->fetch_object($result)->count:0;
 }
-    if(!empty($sortfield)){$sql.= $db->order($sortfield,$sortorder);
+    if(!empty($sortfield)){$sql .= $db->order($sortfield,$sortorder);
     }else{ $sortorder = 'ASC';}
     
     if (!empty($limit))
     {
-            $sql.= $db->plimit($limit+1, $offset); 
+            $sql .= $db->plimit($limit+1, $offset); 
     }
     
 
     //execute SQL
     dol_syslog($script_file, LOG_DEBUG);
-    $resql=$db->query($sql);
+    $resql = $db->query($sql);
     if ($resql)
     {
-        $param='';
-        if (! empty($contextpage) && $contextpage != $_SERVER["PHP_SELF"]) $param.='&contextpage='.urlencode($contextpage);
-        if ($limit > 0 && $limit != $conf->liste_limit) $param.='&limit='.urlencode($limit);
-        $param.=empty($ls_fields1)?'':'&ls_fields1='.urlencode($ls_fields1);
-        $param.=empty($ls_fields2)?'':'&ls_fields2='.urlencode($ls_fields2);
-        if ($filter && $filter != -1) $param.='&filtre='.urlencode($filter);
+        $param = '';
+        if (! empty($contextpage) && $contextpage != $_SERVER["PHP_SELF"]) $param .= '&contextpage = '.urlencode($contextpage);
+        if ($limit > 0 && $limit != $conf->liste_limit) $param .= '&limit = '.urlencode($limit);
+        $param .= empty($ls_fields1)?'':'&ls_fields1 = '.urlencode($ls_fields1);
+        $param .= empty($ls_fields2)?'':'&ls_fields2 = '.urlencode($ls_fields2);
+        if ($filter && $filter != -1) $param .= '&filtre = '.urlencode($filter);
         
         $num = $db->num_rows($resql);
         //print_barre_liste function defined in /core/lib/function.lib.php, possible to add a picto
         print_barre_liste($langs->trans("Skeleton"),$page,$PHP_SELF,$param,$sortfield,$sortorder,'',$num,$nbtotalofrecords);
         print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, $massactionbutton, $num, $nbtotalofrecords, 'title_companies', 0, '', '', $limit);
 
-        print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
-        print '<table class="liste" width="100%">'."\n";
+        print '<form method = "POST" action = "'.$_SERVER["PHP_SELF"].'">';
+        print '<table class = "liste" width = "100%">'."\n";
         //TITLE
-        print '<tr class="liste_titre">';
+        print '<tr class = "liste_titre">';
         print_liste_field_titre($langs->trans('field1'),$PHP_SELF,'t.field1','',$param,'',$sortfield,$sortorder);
         print_liste_field_titre($langs->trans('field2'),$PHP_SELF,'t.field2','',$param,'',$sortfield,$sortorder);
         print '</tr>';
         //SEARCH FIELDS
-        print '<tr class="liste_titre">'; 
-        print '<td><input type="text" name="ls_fields1" value="'.$ls_fields1.'"></td>';
-        print '<td><input type="text" name="ls_fields2" value="'.$ls_fields2.'"></td>';
+        print '<tr class = "liste_titre">'; 
+        print '<td><input type = "text" name = "ls_fields1" value = "'.$ls_fields1.'"></td>';
+        print '<td><input type = "text" name = "ls_fields2" value = "'.$ls_fields2.'"></td>';
         
-        print '<td width="15px">';
-        print '<input type="image" class="liste_titre" name="search" src="'.img_picto($langs->trans("Search"),'search.png','','',1).'" value="'.dol_escape_htmltag($langs->trans("Search")).'" title="'.dol_escape_htmltag($langs->trans("Search")).'">';
-        print '<input type="image" class="liste_titre" name="removefilter" src="'.img_picto($langs->trans("Search"),'searchclear.png','','',1).'" value="'.dol_escape_htmltag($langs->trans("RemoveFilter")).'" title="'.dol_escape_htmltag($langs->trans("RemoveFilter")).'">';
+        print '<td width = "15px">';
+        print '<input type = "image" class = "liste_titre" name = "search" src = "'.img_picto($langs->trans("Search"),'search.png','','',1).'" value = "'.dol_escape_htmltag($langs->trans("Search")).'" title = "'.dol_escape_htmltag($langs->trans("Search")).'">';
+        print '<input type = "image" class = "liste_titre" name = "removefilter" src = "'.img_picto($langs->trans("Search"),'searchclear.png','','',1).'" value = "'.dol_escape_htmltag($langs->trans("RemoveFilter")).'" title = "'.dol_escape_htmltag($langs->trans("RemoveFilter")).'">';
         print '</td>';
         print '</tr>'."\n"; 
-        $i=0;
-        $basedurl=dirname($PHP_SELF).'/skeleton_card.php?action=view&id=';
+        $i = 0;
+        $basedurl = dirname($PHP_SELF).'/skeleton_card.php?action = view&id = ';
         while ($i < $num && $i<$limit)
         {
             $obj = $db->fetch_object($resql);
@@ -289,7 +289,7 @@ if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST))
     print '</table>'."\n";
     print '</form>'."\n";
     // new button
-    print '<a href="skeleton_card.php?action=create" class="butAction" role="button">'.$langs->trans('New');
+    print '<a href = "skeleton_card.php?action = create" class = "butAction" role = "button">'.$langs->trans('New');
     print ' '.$langs->trans('Skeleton')."</a>\n";
 
     
