@@ -29,7 +29,8 @@
 require_once(DOL_DOCUMENT_ROOT."/core/class/commonobject.class.php");
 //require_once(DOL_DOCUMENT_ROOT."/societe/class/societe.class.php");
 //require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
-
+//require_once(DOL_DOCUMENT_ROOT.'/projet/class/project.class.php');
+require_once 'core/lib/generic.lib.php';
 $skeletonStatusPictoArray=array(0=> 'statut7',1=>'statut3',2=>'statut8',3=>'statut4');
 $skeletonStatusArray=array(0=> 'Draft',1=>'Validated',2=>'Cancelled',3 =>'Payed');
 /**
@@ -85,14 +86,14 @@ class Skeleton_Class extends CommonObject
 
         // Insert request
         $sql = "INSERT INTO ".MAIN_DB_PREFIX.$this->table_element."(";
-        $sql.= " field1,";
-        $sql.= " field2";
+        $sql .= " field1,";
+        $sql .= " field2";
         //...
-        $sql.= ") VALUES (";
-        $sql.= " '".$this->prop1."',";
-        $sql.= " '".$this->prop2."'";
+        $sql .= ") VALUES (";
+        $sql .= " '".$this->prop1."',";
+        $sql .= " '".$this->prop2."'";
         //...
-        $sql.= ")";
+        $sql .= ")";
 
         $this->db->begin();
 
@@ -122,7 +123,7 @@ class Skeleton_Class extends CommonObject
             foreach($this->errors as $errmsg)
             {
                 dol_syslog(__METHOD__." ".$errmsg, LOG_ERR);
-                $this->error.=($this->error?', '.$errmsg:$errmsg);
+                $this->error .= ($this->error?', '.$errmsg:$errmsg);
             }
             $this->db->rollback();
             return -1*$error;
@@ -146,13 +147,13 @@ class Skeleton_Class extends CommonObject
     {
     	global $langs;
         $sql = "SELECT";
-        $sql.= " t.rowid,";
-        $sql.= " t.field1,";
-        $sql.= " t.field2";
+        $sql .= " t.rowid,";
+        $sql .= " t.field1,";
+        $sql .= " t.field2";
         //...
-        $sql.= " FROM ".MAIN_DB_PREFIX.$this->table_element." as t";
-        if ($ref) $sql.= " WHERE t.ref = '".$ref."'";
-        else $sql.= " WHERE t.rowid = ".$id;
+        $sql .= " FROM ".MAIN_DB_PREFIX.$this->table_element." as t";
+        if ($ref) $sql .= " WHERE t.ref = '".$ref."'";
+        else $sql .= " WHERE t.rowid = ".$id;
     	dol_syslog(get_class($this)."::fetch");
         $resql=$this->db->query($sql);
         if ($resql)
@@ -193,10 +194,10 @@ class Skeleton_Class extends CommonObject
         // Put here code to add a control on parameters values
         // Update request
         $sql = "UPDATE ".MAIN_DB_PREFIX.$this->table_element." SET";
-        $sql.= $this->setSQLfields($user);
-        $sql.= " WHERE rowid=".$this->id;
-	$this->db->begin();
-	dol_syslog(__METHOD__);
+        $sql .= $this->setSQLfields($user);
+        $sql .= " WHERE rowid=".$this->id;
+		$this->db->begin();
+		dol_syslog(__METHOD__);
         $resql = $this->db->query($sql);
     	if (! $resql) { $error++; $this->errors[]="Error ".$this->db->lasterror(); }
             if (! $error)
@@ -219,7 +220,7 @@ class Skeleton_Class extends CommonObject
                 foreach($this->errors as $errmsg)
                 {
                     dol_syslog(__METHOD__." ".$errmsg, LOG_ERR);
-                    $this->error.=($this->error?', '.$errmsg:$errmsg);
+                    $this->error .= ($this->error?', '.$errmsg:$errmsg);
                 }
                 $this->db->rollback();
                 return -1*$error;
@@ -248,53 +249,53 @@ class Skeleton_Class extends CommonObject
 
         if (! empty($conf->dol_no_mouse_hover)) $notooltip=1;   // Force disable tooltips
     	$result='';
-        if(empty($ref) && $id==0){
+        if(empty($ref) && $id == 0){
             if(isset($this->id))  {
-                $id=$this->id;
+                $id = $this->id;
             }else if (isset($this->rowid)){
-                $id=$this->rowid;
+                $id = $this->rowid;
             }if(isset($this->ref)){
-                $ref=$this->ref;
+                $ref = $this->ref;
             }
         }
-        $linkclose='';
+        $linkclose = '';
         if (empty($notooltip))
         {
             if (! empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER))
             {
-                $label=$langs->trans("Showspread");
-                $linkclose.=' alt="'.dol_escape_htmltag($label, 1).'"';
+                $label = $langs->trans("Showspread");
+                $linkclose .= ' alt = "'.dol_escape_htmltag($label, 1).'"';
             }
-            $linkclose.=' title="'.dol_escape_htmltag($label, 1).'"';
-            $linkclose.=' class="classfortooltip'.($morecss?' '.$morecss:'').'"';
-        }else $linkclose = ($morecss?' class="'.$morecss.'"':'');
+            $linkclose .= ' title = "'.dol_escape_htmltag($label, 1).'"';
+            $linkclose .= ' class = "classfortooltip'.($morecss?' '.$morecss:'').'"';
+        }else $linkclose = ($morecss?' class = "'.$morecss.'"':'');
         
         if($id){
-            $lien = '<a href="'.dol_buildpath('/mymodule/Skeleton_card.php',1).'id='.$id.'&action=view"'.$linkclose.'>';
+            $lien = '<a href = "'.dol_buildpath('/mymodule/Skeleton_card.php',1).'id = '.$id.'&action = view"'.$linkclose.'>';
         }else if (!empty($ref)){
-            $lien = '<a href="'.dol_buildpath('/mymodule/Skeleton_card.php',1).'?ref='.$ref.'&action=view"'.$linkclose.'>';
+            $lien = '<a href = "'.dol_buildpath('/mymodule/Skeleton_card.php',1).'?ref = '.$ref.'&action = view"'.$linkclose.'>';
         }else{
-            $lien =  "";
+            $lien = "";
         }
-        $lienfin=empty($lien)?'':'</a>';
+        $lienfin = empty($lien)?'':'</a>';
 
-    	$picto='generic';
+    	$picto = 'generic';
         $label = '<u>' . $langs->trans("spread") . '</u>';
-        $label.= '<br>';
+        $label .= '<br>';
         if($ref){
-            $label.=$langs->trans("Red").': '.$ref;
+            $label .= $langs->trans("Red").': '.$ref;
         }else if($id){
-            $label.=$langs->trans("#").': '.$id;
+            $label .= $langs->trans("#").': '.$id;
         }
         
         
         
-    	if ($withpicto==1){ 
-            $result.=($lien.img_object($label,$picto).$htmlcontent.$lienfin);
-        }else if ($withpicto==2) {
-            $result.=$lien.img_object($label,$picto).$lienfin;
+    	if ($withpicto == 1){ 
+            $result .= ($lien.img_object($label,$picto).$htmlcontent.$lienfin);
+        }else if ($withpicto == 2) {
+            $result .= $lien.img_object($label,$picto).$lienfin;
         }else{  
-            $result.=$lien.$htmlcontent.$lienfin;
+            $result .= $lien.$htmlcontent.$lienfin;
         }
     	return $result;
     }  
@@ -304,7 +305,7 @@ class Skeleton_Class extends CommonObject
 	 *  @param	object 		$form          form object that should be created	
       *  *  @return	string 			       html code to select status
 	 */
-	function selectLibStatut($form,$htmlname='Status')
+	function selectLibStatut($form,$htmlname = 'Status')
 	{
             global $skeletonStatusPictoArray,$skeletonStatusArray;
             return $form->selectarray($htmlname,$skeletonStatusArray,$this->status);
@@ -312,10 +313,10 @@ class Skeleton_Class extends CommonObject
     /**
 	 *  Retourne le libelle du status (actif, inactif)
 	 *
-	 *  @param	int		$mode          0=libelle long, 1=libelle court, 2=Picto + Libelle court, 3=Picto, 4=Picto + Libelle long, 5=Libelle court + Picto
+	 *  @param	int		$mode          0 = libelle long, 1 = libelle court, 2 = Picto + Libelle court, 3 = Picto, 4 = Picto + Libelle long, 5 = Libelle court + Picto
 	 *  @return	string 			       Label of status
 	 */
-	function getLibStatut($mode=0)
+	function getLibStatut($mode = 0)
 	{
 		return $this->LibStatut($this->status,$mode);
 	}
@@ -323,15 +324,15 @@ class Skeleton_Class extends CommonObject
 	 *  Return the status
 	 *
 	 *  @param	int		$status        	Id status
-	 *  @param  int		$mode          	0=long label, 1=short label, 2=Picto + short label, 3=Picto, 4=Picto + long label, 5=Short label + Picto, 6=Long label + Picto
+	 *  @param  int		$mode          	0 = long label, 1 = short label, 2 = Picto + short label, 3 = Picto, 4 = Picto + long label, 5 = Short label + Picto, 6 = Long label + Picto
 	 *  @return string 			       	Label of status
 	 */
-	static function LibStatut($status,$mode=0)
+	static function LibStatut($status,$mode = 0)
 	{
 		global $langs,$skeletonStatusPictoArray,$skeletonStatusArray;
 		if ($mode == 0)
 		{
-			$prefix='';
+			$prefix = '';
 			return $langs->trans($skeletonStatusArray[$status]);
 		}
 		if ($mode == 1)
@@ -364,13 +365,13 @@ class Skeleton_Class extends CommonObject
      *  Delete object in database
      *
     *	@param  User	$user        User that deletes
-    *   @param  int		$notrigger	 0=launch triggers after, 1=disable triggers
+    *   @param  int		$notrigger	 0 = launch triggers after, 1 = disable triggers
      *  @return	int					 <0 if KO, >0 if OK
      */
-    function delete($user, $notrigger=0)
+    function delete($user, $notrigger = 0)
     {
         global $conf, $langs;
-        $error=0;
+        $error = 0;
         $this->db->begin();
         if (! $error)
         {
@@ -379,7 +380,7 @@ class Skeleton_Class extends CommonObject
         // Uncomment this and change MYOBJECT to your own tag if you
         // want this action calls a trigger.
         //// Call triggers
-        //$result=$this->call_trigger('MYOBJECT_DELETE',$user);
+        //$result = $this->call_trigger('MYOBJECT_DELETE',$user);
         //if ($result < 0) { $error++; //Do also what you must do to rollback action if trigger fail}
         //// End call triggers
             }
@@ -387,12 +388,12 @@ class Skeleton_Class extends CommonObject
         if (! $error)
         {
         $sql = "DELETE FROM ".MAIN_DB_PREFIX.$this->table_element;
-        $sql.= " WHERE rowid=".$this->id;
+        $sql .= " WHERE rowid = ".$this->id;
 
         dol_syslog(__METHOD__);
         $resql = $this->db->query($sql);
-        if (! $resql) { $error++; $this->errors[]="Error ".$this->db->lasterror(); }
-        else if ($this->db->affected_rows($resql)==0){$error++;$this->errors[]="Item no found in database"; }
+        if (! $resql) { $error++; $this->errors[] = "Error ".$this->db->lasterror(); }
+        else if ($this->db->affected_rows($resql) == 0){$error++;$this->errors[] = "Item no found in database"; }
 
         }
 
@@ -402,7 +403,7 @@ class Skeleton_Class extends CommonObject
             foreach($this->errors as $errmsg)
             {
                 dol_syslog(__METHOD__." ".$errmsg, LOG_ERR);
-                $this->error.=($this->error?', '.$errmsg:$errmsg);
+                $this->error .= ($this->error?', '.$errmsg:$errmsg);
             }
             $this->db->rollback();
             return -1*$error;
@@ -425,22 +426,22 @@ class Skeleton_Class extends CommonObject
     function createFromClone($fromid)
     {
         global $user,$langs;
-        $error=0;
-        $object=new Skeleton_Class($this->db);
+        $error = 0;
+        $object = new Skeleton_Class($this->db);
         $this->db->begin();
         // Load source object
         $object->fetch($fromid);
-        $object->id=0;
-        $object->statut=0;
+        $object->id = 0;
+        $object->statut = 0;
         // Clear fields
         // ...
         // Create clone
-        $result=$object->create($user);
+        $result = $object->create($user);
 
         // Other options
         if ($result < 0)
         {
-            $this->error=$object->error;
+            $this->error = $object->error;
             $error++;
         }
         if (! $error)
@@ -467,9 +468,9 @@ class Skeleton_Class extends CommonObject
      */
     function initAsSpecimen()
     {
-        $this->id=0;
-        $this->prop1='prop1';
-        $this->prop2='prop2';
+        $this->id = 0;
+        $this->prop1 = 'prop1';
+        $this->prop2 = 'prop2';
     }
     /**
      *	will clean the parameters
@@ -478,8 +479,8 @@ class Skeleton_Class extends CommonObject
      *	@return	void
      */       
     function cleanParam(){
-        if (isset($this->prop1)) $this->prop1=trim($this->prop1);
-        if (isset($this->prop2)) $this->prop2=trim($this->prop2);
+        if (isset($this->prop1)) $this->prop1 = trim($this->prop1);
+        if (isset($this->prop2)) $this->prop2 = trim($this->prop2);
     }
      /**
      *	will create the sql part to update the parameters
@@ -488,59 +489,72 @@ class Skeleton_Class extends CommonObject
      *	@return	void
      */    
     function setSQLfields($user){
-        $sql='';
-        $sql.= " field1=".(isset($this->field1)?"'".$this->db->escape($this->field1)."'":"null").",";
-        $sql.= " field2=".(isset($this->field2)?"'".$this->db->escape($this->field2)."'":"null")."";
+        $sql = '';
+        $sql .= " field1 = ".(isset($this->field1)?"'".$this->db->escape($this->field1)."'":"null").",";
+        $sql .= " field2 = ".(isset($this->field2)?"'".$this->db->escape($this->field2)."'":"null")."";
         return $sql;
     }
     /*
     * function to save a skeleton as a string
-    * @param    int     $mode   0=>serialize, 1=> json_encode, 2 => json_encode PRETTY PRINT 
+    * @param    int     $mode   0 = >serialize, 1 = > json_encode, 2 = > json_encode PRETTY PRINT 
     * @return   string       serialized object
     */
-    public function serialize($mode=0){
-       $ret='';
-       $array= array();
-       $array['field1']= $this->field1;
-       $array['field2']= $this->field2;
-       $array['processedTime']= mktime();
+    public function serialize($mode = 0){
+		$ret = '';
+		$array = array();
+		$array['field1'] = $this->field1;
+		$array['field2'] = $this->field2;
+		$array['processedTime'] = mktime();
         switch($mode)
         {
             default:
             case 0:
-                $ret=  serialize($array);
+                $ret = serialize($array);
                 break;
             case 1:
-                $ret=json_encode($array);
+                $ret = json_encode($array);
                 break;
             case 2:
-                $ret=json_encode($array, JSON_PRETTY_PRINT);
+                $ret = json_encode($array, JSON_PRETTY_PRINT);
                 break;
         }
          return $ret;
     }
      /* function to load a skeleton as a string
      * @param   string    $str   serialized object
-     * @param    int     $mode   0=>serialize, 1=> json_encode, 2 => json_encode PRETTY PRINT
+     * @param    int     $mode   0 = >serialize, 1 = > json_encode, 2 = > json_encode PRETTY PRINT
      * @return  int              OK
      */    
-       public function unserialize($str,$mode=0){
-       $ret='';
-       $array= array();
+       public function unserialize($str,$mode = 0){
+       $ret = '';
+       $array = array();
         switch($mode)
         {
             default:
             case 0:
-                $array= unserialize($str);
+                $array = unserialize($str);
                 break;
             case 1:
             case 2:
-                $array=json_decode($str);
+                $array = json_decode($str);
                 break;
         }
         // automatic unserialisation based on match between property name and key value
-        foreach ($array as $key => $value) {
-            if(isset($this->{$key}))$this->{$key}=$value;
+        foreach ($array as $key = > $value) {
+            if(isset($this->{$key}))$this->{$key} = $value;
         }
+    }
+
+        /**
+     *  Function to generate a sellist
+     *  @param int $selected rowid to be preselected
+     *  @return string HTML select list
+     */
+    
+    Public function sellist($selected = ''){    
+        $sql = array('table' => $this->table_element , 'keyfield' => 'rowid', 'fields' => 't.field1, t.field2', 'join' => '', 'where' => '', 'tail' => '');
+        $html = array('name' => 'Skeleton', 'class' => '', 'otherparam' => '', 'ajaxNbChar' => '', 'separator' => '-');
+        $addChoices = null;
+		return select_sellist($sql, $html, $selected, $addChoices );
     }
 }

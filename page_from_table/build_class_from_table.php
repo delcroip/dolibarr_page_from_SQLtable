@@ -223,7 +223,8 @@ foreach($property as $key => $prop)
 // Define working variables
 $table = strtolower($table);
 $tablenoprefix = preg_replace('/'.preg_quote(MAIN_DB_PREFIX).'/i','',$table);
-$classname = preg_replace('/_/','',ucfirst($tablenoprefix));
+$classnameArr = explode('_',$tablenoprefix);
+$classname = implode(array_map('ucfirst', $classnameArr));
 $classmin = preg_replace('/_/','',strtolower($classname));
 
 
@@ -280,7 +281,7 @@ foreach($property as $key => $prop)
 {
 	if ($prop['insertfield'] ||$prop['updatefield'])
 	{
-		$varprop .= "\tif (!empty(\$this->".$prop['var'].")) \$this->".$prop['var']." = trim(\$this->".$prop['var'].");";
+		$varprop .= "\t\t\tif (!empty(\$this->".$prop['var'].")) \$this->".$prop['var']." = trim(\$this->".$prop['var'].");";
 		$varprop .= "\n";
 	}
 }
@@ -296,7 +297,7 @@ foreach($property as $key => $prop)
 	$i++;
 	if ($prop['insertfield'])
 	{
-		$varprop .= "\t\$sql .= '".$prop['field'];
+		$varprop .= "\t\t\$sql .= '".$prop['field'];
                 if($i<$lastinsertfield)
                     $varprop .= ",";
                 $varprop .= "';\n";
@@ -315,7 +316,7 @@ foreach($property as $key => $prop)
 	$i++;
 	if ($prop['insertfield'])
 	{
-		$varprop .= "\t\$sql .= ' ";
+		$varprop .= "\t\t\$sql .= ' ";
 		
                 if($prop['var'] == 'date_creation' ||$prop['var'] == 'date_creat' || $prop['var'] == 'datec'){
                         $varprop .= 'NOW() ';
@@ -361,7 +362,7 @@ foreach($property as $key => $prop)
 	{
 //FIXME the " should be removed in oder to avoid string processing as much as possible when page load
                 
-                $varprop .= "\t\$sql .= ' ";
+                $varprop .= "\t\t\$sql .= ' ";
                 $varprop .= $prop['field'].' = ';
                 if($prop['var'] == 'date_modification'||$prop['var'] == 'date_modif'){
                     $varprop .= 'NOW() ';
@@ -406,7 +407,7 @@ foreach($property as $key => $prop)
     $i++;
     if ($prop['field'] != 'rowid')
     {
-        $varpropselect .= "\t\$sql .= ' ";
+        $varpropselect .= "\t\t\$sql .= ' ";
         $varpropselect .= "t.".$prop['field'];
         if ($i < count($property)) $varpropselect .= ",";
         $varpropselect .= "';";
@@ -449,8 +450,8 @@ foreach($property as $key => $prop)
 		$varprop .= "\n";
 	}
 }
-$targetcontent = preg_replace('/\$this->prop1=\'prop1\';/', $varprop, $targetcontent);
-$targetcontent = preg_replace('/\$this->prop2=\'prop2\';/', '', $targetcontent);
+$targetcontent = preg_replace('/\$this->prop1 = \'prop1\';/', $varprop, $targetcontent);
+$targetcontent = preg_replace('/\$this->prop2 = \'prop2\';/', '', $targetcontent);
 // Substitute serialize parameters
 $varprop = "\n";
 $cleanparam = '';
@@ -458,12 +459,12 @@ foreach($property as $key => $prop)
 {
 	if ($prop['insertfield'] ||$prop['updatefield'])
 	{
-		$varprop .= "\t\$array['".$prop['var']."']=\$this->".$prop['var'].";";
+		$varprop .= "\t\t\$array['".$prop['var']."'] = \$this->".$prop['var'].";";
 		$varprop .= "\n";
 	}
 }
-$targetcontent = preg_replace('/\$array\[\'field1\'\]= \$this->field1;/', $varprop, $targetcontent);
-$targetcontent = preg_replace('/\$array\[\'field2\'\]= \$this->field2;/', '', $targetcontent);
+$targetcontent = preg_replace('/\$array\[\'field1\'\] = \$this->field1;/', $varprop, $targetcontent);
+$targetcontent = preg_replace('/\$array\[\'field2\'\] = \$this->field2;/', '', $targetcontent);
 
 
 // Build file
@@ -551,8 +552,8 @@ $targetcontent = $sourcecontent;
 // Substitute class name
 $targetcontent = preg_replace('/skeleton_class\.class\.php/', $classmin.'.class.php', $targetcontent);
 $targetcontent = preg_replace('/skeleton_script\.php/', $classmin.'_script.php', $targetcontent);
-$targetcontent = preg_replace('/\$element=\'skeleton\'/', '\$element=\''.$classmin.'\'', $targetcontent);
-$targetcontent = preg_replace('/\$table_element=\'skeleton\'/', '\$table_element=\''.$classmin.'\'', $targetcontent);
+$targetcontent = preg_replace('/\$element = \'skeleton\'/', '\$element = \''.$classmin.'\'', $targetcontent);
+$targetcontent = preg_replace('/\$table_element = \'skeleton\'/', '\$table_element = \''.$classmin.'\'', $targetcontent);
 $targetcontent = preg_replace('/Skeleton_Class/', $classname, $targetcontent);
 $targetcontent = preg_replace('/Skeleton/', $classname, $targetcontent);
 $targetcontent = preg_replace('/skeleton/', $classmin, $targetcontent);
@@ -710,7 +711,7 @@ foreach($property as $key => $prop)
                 { 
 
                     if($prop['select'] != ''){
-                        $varprop .= "\t\t\$selected=\$object->".$prop['var'].";\n";
+                        $varprop .= "\t\t\$selected = \$object->".$prop['var'].";\n";
                         $varprop .= "\t\t\$htmlname = '".$prop['display']."';\n";
                         $varprop .= "\t\t".$prop['select'];
                     }else{
@@ -837,13 +838,13 @@ foreach($property as $key => $prop)
             $varprop .= "\t\$formother->select_year(\$syear?\$syear:-1,'ls_".$prop['var']."_year',1, 20, 5);\n";
 
         }else if($prop['select'] != '') {       
-            $varprop .= "\t\t\$selected=\$ls_".$prop['var'].";\n";
+            $varprop .= "\t\t\$selected = \$ls_".$prop['var'].";\n";
 			$varprop .= "\$htmlname = 'ls_".$prop['var']."';\n";
 			$varprop .= $prop['select'];
 		}else if(strpos($prop['field'],'fk_') === 0) {
 
             if($prop['select'] != ''){
-                $varprop .= "\t\t\$selected=\$ls_".$prop['var'].";\n";
+                $varprop .= "\t\t\$selected = \$ls_".$prop['var'].";\n";
                 $varprop .= "\t\t\$htmlname = 'ls_".$prop['var']."';\n";
                 $varprop .= "\t\t".$prop['select'];
             }else{
