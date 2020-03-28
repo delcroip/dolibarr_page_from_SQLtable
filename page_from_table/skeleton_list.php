@@ -153,7 +153,7 @@ $formproject = new FormProjets($db);
        break;
     case 'delete':
         if( $action == 'delete' && ($id>0 || $ref != "")){
-         $ret = $form->form_confirm(dol_buildpath('/mymodule/Skeleton_card.php',1).'?action = confirm_delete&id = '.$id,$langs->trans('DeleteSkeleton'),$langs->trans('ConfirmDelete'),'confirm_delete', '', 0, 1);
+         $ret = $form->form_confirm(dol_buildpath('/mymodule/Skeleton_card.php',1).'?action=confirm_delete&id='.$id,$langs->trans('DeleteSkeleton'),$langs->trans('ConfirmDelete'),'confirm_delete', '', 0, 1);
          if ($ret == 'html') print '<br />';
          //to have the object to be deleted in the background\
         }
@@ -237,11 +237,11 @@ if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST))
     if ($resql)
     {
         $param = '';
-        if (! empty($contextpage) && $contextpage != $_SERVER["PHP_SELF"]) $param .= '&contextpage = '.urlencode($contextpage);
-        if ($limit > 0 && $limit != $conf->liste_limit) $param .= '&limit = '.urlencode($limit);
-        $param .= empty($ls_fields1)?'':'&ls_fields1 = '.urlencode($ls_fields1);
-        $param .= empty($ls_fields2)?'':'&ls_fields2 = '.urlencode($ls_fields2);
-        if ($filter && $filter != -1) $param .= '&filtre = '.urlencode($filter);
+        if (! empty($contextpage) && $contextpage != $_SERVER["PHP_SELF"]) $param .= '&contextpage='.urlencode($contextpage);
+        if ($limit > 0 && $limit != $conf->liste_limit) $param .= '&limit='.urlencode($limit);
+        $param .= empty($ls_fields1)?'':'&ls_fields1='.urlencode($ls_fields1);
+        $param .= empty($ls_fields2)?'':'&ls_fields2='.urlencode($ls_fields2);
+        if ($filter && $filter != -1) $param .= '&filtre='.urlencode($filter);
         
         $num = $db->num_rows($resql);
         //print_barre_liste function defined in /core/lib/function.lib.php, possible to add a picto
@@ -266,7 +266,7 @@ if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST))
         print '</td>';
         print '</tr>'."\n"; 
         $i = 0;
-        $basedurl = dirname($PHP_SELF).'/skeleton_card.php?action = view&id = ';
+        $basedurl = dirname($PHP_SELF).'/skeleton_card.php?action=view&id=';
         while ($i < $num && $i<$limit)
         {
             $obj = $db->fetch_object($resql);
@@ -289,7 +289,7 @@ if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST))
     print '</table>'."\n";
     print '</form>'."\n";
     // new button
-    print '<a href = "skeleton_card.php?action = create" class = "butAction" role = "button">'.$langs->trans('New');
+    print '<a href = "skeleton_card.php?action=create" class = "butAction" role = "button">'.$langs->trans('New');
     print ' '.$langs->trans('Skeleton')."</a>\n";
 
     

@@ -139,51 +139,51 @@ if ($resql)
 		{
 			$property[$i]['ischar'] = false;
 		}
-                $property[$i]['class'] = getClassName($property[$i]['var']);
-                $property[$i]['select'] = getSelectFunction($property[$i]['class']);
-                $addfield = 1;
-                if($property[$i]['var'] == 'id') $addfield = 0;
-                if($property[$i]['var'] == 'entity') $addfield = 0;
-                if($property[$i]['var'] == 'rowid') $addfield = 0;
-                if($property[$i]['var'] == 'user_modification' ) $addfield = 0;
-                if($property[$i]['var'] == 'user_modif') $addfield = 0;
-                if($property[$i]['var'] == 'date_modification') $addfield = 0;
-                if($property[$i]['var'] == 'date_modif') $addfield = 0;
-                if($property[$i]['var'] == 'user_creation') $addfield = 0;
-                if($property[$i]['var'] == 'user_author') $addfield = 0;
-                if($property[$i]['var'] == 'user_creat') $addfield = 0;
-                if($property[$i]['var'] == 'date_creation') $addfield = 0;
-                if($property[$i]['var'] == 'date_creat') $addfield = 0;
+            $property[$i]['class'] = getClassName($property[$i]['var']);
+            $property[$i]['select'] = getSelectFunction($property[$i]['class']);
+            $addfield = 1;
+            if($property[$i]['var'] == 'id') $addfield = 0;
+            if($property[$i]['var'] == 'entity') $addfield = 0;
+            if($property[$i]['var'] == 'rowid') $addfield = 0;
+            if($property[$i]['var'] == 'user_modification' ) $addfield = 0;
+            if($property[$i]['var'] == 'user_modif') $addfield = 0;
+            if($property[$i]['var'] == 'date_modification') $addfield = 0;
+            if($property[$i]['var'] == 'date_modif') $addfield = 0;
+            if($property[$i]['var'] == 'user_creation') $addfield = 0;
+            if($property[$i]['var'] == 'user_author') $addfield = 0;
+            if($property[$i]['var'] == 'user_creat') $addfield = 0;
+            if($property[$i]['var'] == 'date_creation') $addfield = 0;
+            if($property[$i]['var'] == 'date_creat') $addfield = 0;
+            if($property[$i]['var'] == 'datec') $addfield = 0;
+            if ($property[$i]['field'] == 'tms') $addfield = 0;	// This is a field of type timestamp edited automatically
+            if ($property[$i]['extra'] == 'auto_increment') $addfield = 0;
+            $property[$i]['showfield'] = ($addfield == 1)?true:false;
+            //insert/create  exclusion
+            $addfield = 1;
+            if($property[$i]['var'] == 'id') $addfield = 0;
+            if($property[$i]['var'] == 'entity') $addfield = 0;
+            if($property[$i]['var'] == 'rowid') $addfield = 0;
+            if($property[$i]['var'] == 'user_modification') $addfield = 0;
+            if($property[$i]['var'] == 'user_modif') $addfield = 0;
+            if($property[$i]['var'] == 'date_modification' ) $addfield = 0;
+            if($property[$i]['var'] == 'date_modif' ) $addfield = 0;
+            if ($property[$i]['field'] == 'tms') $addfield = 0;	// This is a field of type timestamp edited automatically
+            if ($property[$i]['extra'] == 'auto_increment') $addfield = 0;
+            $property[$i]['insertfield'] = ($addfield == 1)?true:false;
+            //update exclusiton
+            $addfield = 1;
+            if($property[$i]['var'] == 'id') $addfield = 0;
+            if($property[$i]['var'] == 'entity') $addfield = 0;
+            if($property[$i]['var'] == 'rowid') $addfield = 0;
+            if($property[$i]['var'] == 'user_creation') $addfield = 0;
+            if($property[$i]['var'] == 'user_creat') $addfield = 0;
+            if($property[$i]['var'] == 'user_author') $addfield = 0;
+            if($property[$i]['var'] == 'date_creation') $addfield = 0;
+            if($property[$i]['var'] == 'date_creat') $addfield = 0;
                 if($property[$i]['var'] == 'datec') $addfield = 0;
-                if ($property[$i]['field'] == 'tms') $addfield = 0;	// This is a field of type timestamp edited automatically
-                if ($property[$i]['extra'] == 'auto_increment') $addfield = 0;
-                $property[$i]['showfield'] = ($addfield == 1)?true:false;
-                //insert/create  exclusion
-                $addfield = 1;
-                if($property[$i]['var'] == 'id') $addfield = 0;
-                if($property[$i]['var'] == 'entity') $addfield = 0;
-                if($property[$i]['var'] == 'rowid') $addfield = 0;
-                if($property[$i]['var'] == 'user_modification') $addfield = 0;
-                if($property[$i]['var'] == 'user_modif') $addfield = 0;
-                if($property[$i]['var'] == 'date_modification' ) $addfield = 0;
-                if($property[$i]['var'] == 'date_modif' ) $addfield = 0;
-                if ($property[$i]['field'] == 'tms') $addfield = 0;	// This is a field of type timestamp edited automatically
-                if ($property[$i]['extra'] == 'auto_increment') $addfield = 0;
-                $property[$i]['insertfield'] = ($addfield == 1)?true:false;
-                //update exclusiton
-                $addfield = 1;
-                if($property[$i]['var'] == 'id') $addfield = 0;
-                if($property[$i]['var'] == 'entity') $addfield = 0;
-                if($property[$i]['var'] == 'rowid') $addfield = 0;
-                if($property[$i]['var'] == 'user_creation') $addfield = 0;
-                if($property[$i]['var'] == 'user_creat') $addfield = 0;
-                if($property[$i]['var'] == 'user_author') $addfield = 0;
-                if($property[$i]['var'] == 'date_creation') $addfield = 0;
-                if($property[$i]['var'] == 'date_creat') $addfield = 0;
-                 if($property[$i]['var'] == 'datec') $addfield = 0;
-                if ($property[$i]['field'] == 'tms') $addfield = 0;	// This is a field of type timestamp edited automatically
-                if ($property[$i]['extra'] == 'auto_increment') $addfield = 0;
-                $property[$i]['updatefield'] = ($addfield == 1)?true:false;
+            if ($property[$i]['field'] == 'tms') $addfield = 0;	// This is a field of type timestamp edited automatically
+            if ($property[$i]['extra'] == 'auto_increment') $addfield = 0;
+            $property[$i]['updatefield'] = ($addfield == 1)?true:false;
                 
 	}
 }
@@ -925,7 +925,7 @@ if($prop['showfield'] == true)
  }
 
 }
-$varprop .= "\tprint '<td><a href=\"{$classmin}_card.php?action = delete&id = '.\$obj->rowid.'\">'.img_delete().'</a></td>';\n";
+$varprop .= "\tprint '<td><a href=\"{$classmin}_card.php?action=delete&id='.\$obj->rowid.'\">'.img_delete().'</a></td>';\n";
 						
 $varprop .= "\tprint \"</tr>\";\n";
 $targetcontent = preg_replace('/print "<tr><td>prop1<\/td><td>"\.\$obj->field1\."<\/td><\/tr>";/', $varprop, $targetcontent);
